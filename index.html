@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSI Model — Interactive Learning Hub</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-primary: #0a0e1a; --bg-secondary: #111827; --bg-card: #1a2235;
+  --bg-card-hover: #1e2a40; --text-primary: #e2e8f0; --text-secondary: #94a3b8;
+  --text-muted: #64748b; --border: #2d3748; --border-light: #374151;
+  --red: #ef4444; --orange: #f97316; --green: #22c55e; --blue: #3b82f6;
+  --purple: #a855f7; --cyan: #06b6d4; --yellow: #eab308;
+}
+body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; }
+.bg-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; z-index: 0; }
+.bg-orb { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; animation: orbFloat 8s ease-in-out infinite; }
+.bg-orb-1 { width:600px;height:600px;background:radial-gradient(circle,rgba(99,102,241,0.08),transparent 70%);top:-200px;right:-200px; }
+.bg-orb-2 { width:500px;height:500px;background:radial-gradient(circle,rgba(239,68,68,0.05),transparent 70%);bottom:-150px;left:-150px;animation-delay:-4s; }
+@keyframes orbFloat { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-20px)} }
+.app { position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 24px; }
+header { text-align:center;padding:50px 0 32px; }
+.header-badge { display:inline-flex;align-items:center;gap:8px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#818cf8;margin-bottom:16px; }
+.header-badge::before { content:'';width:6px;height:6px;background:#818cf8;border-radius:50%;animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+h1 { font-size:clamp(28px,5vw,52px);font-weight:800;line-height:1.1;background:linear-gradient(135deg,#e2e8f0,#94a3b8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px; }
+.header-sub { font-size:16px;color:var(--text-secondary);max-width:600px;margin:0 auto 28px;line-height:1.6; }
+.nav-tabs { display:flex;justify-content:center;gap:8px;margin-bottom:40px;flex-wrap:wrap; }
+.nav-tab { padding:10px 18px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s; }
+.nav-tab:hover { border-color:#4f46e5;color:var(--text-primary);background:var(--bg-card-hover); }
+.nav-tab.active { background:linear-gradient(135deg,#4f46e5,#7c3aed);border-color:transparent;color:white;box-shadow:0 0 20px rgba(79,70,229,0.4); }
+.nav-tab.danger-tab.active { background:linear-gradient(135deg,#dc2626,#991b1b);box-shadow:0 0 20px rgba(220,38,38,0.4); }
+.nav-tab.danger-tab { color:#fca5a5; }
+.view { display:none; }
+.view.active { display:block; }
+
+.stack-container { display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start; }
+@media(max-width:900px){.stack-container{grid-template-columns:1fr;}}
+.layer-stack { position:sticky;top:20px; }
+.layer-item { position:relative;padding:12px 16px;margin-bottom:4px;border-radius:12px;cursor:pointer;transition:all 0.25s cubic-bezier(0.4,0,0.2,1);border:1px solid transparent;display:flex;align-items:center;gap:12px;overflow:hidden; }
+.layer-item::before { content:'';position:absolute;inset:0;background:var(--layer-color);opacity:0.07;transition:opacity 0.25s; }
+.layer-item:hover::before,.layer-item.active::before { opacity:0.15; }
+.layer-item.active { border-color:var(--layer-color);box-shadow:0 0 20px -5px var(--layer-color);transform:translateX(4px); }
+.layer-num { width:32px;height:32px;border-radius:8px;background:var(--layer-color);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;flex-shrink:0; }
+.layer-info h3 { font-size:13px;font-weight:700; }
+.layer-info p { font-size:11px;color:var(--text-muted);margin-top:1px; }
+.pdu-badge { font-size:9px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.06);color:var(--text-muted);border:1px solid var(--border);margin-left:auto;text-transform:uppercase;letter-spacing:0.05em;flex-shrink:0; }
+.detail-panel { background:var(--bg-card);border:1px solid var(--border);border-radius:20px;overflow:hidden; }
+.detail-header { padding:24px 28px;border-bottom:1px solid var(--border);position:relative;overflow:hidden; }
+.detail-header::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--layer-color),transparent);opacity:0.08; }
+.detail-header-top { display:flex;align-items:flex-start;gap:14px;position:relative; }
+.detail-num { width:48px;height:48px;border-radius:12px;background:var(--layer-color);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:white;flex-shrink:0; }
+.detail-title h2 { font-size:22px;font-weight:800; }
+.detail-title .layer-subtitle { color:var(--text-secondary);font-size:13px;margin-top:3px; }
+.detail-desc { margin-top:14px;color:var(--text-secondary);font-size:14px;line-height:1.7;position:relative; }
+.detail-body { padding:24px 28px; }
+@media(max-width:700px){.detail-header,.detail-body{padding:16px;}}
+.inner-tabs { display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap; }
+.inner-tab { padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s; }
+.inner-tab:hover { color:var(--text-primary);border-color:var(--layer-color); }
+.inner-tab.active { background:var(--layer-color);border-color:transparent;color:white; }
+.inner-tab.hacker-tab { border-color:rgba(239,68,68,0.3);color:#fca5a5; }
+.inner-tab.hacker-tab.active { background:linear-gradient(135deg,#dc2626,#991b1b);color:white; }
+.inner-section { display:none; }
+.inner-section.active { display:block; }
+.detail-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
+@media(max-width:650px){.detail-grid{grid-template-columns:1fr;}}
+.info-card { background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:16px; }
+.info-card-title { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:8px; }
+.info-card-title::after { content:'';flex:1;height:1px;background:var(--border); }
+
+.chip-list { display:flex;flex-wrap:wrap;gap:6px; }
+.chip { padding:5px 11px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;border:1px solid;position:relative; }
+.chip:hover { transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+.chip.protocol { border-color:rgba(99,102,241,0.4);color:#818cf8;background:rgba(99,102,241,0.1); }
+.chip.protocol:hover { background:#4f46e5;color:white;border-color:#4f46e5; }
+.chip.device { border-color:rgba(6,182,212,0.4);color:#22d3ee;background:rgba(6,182,212,0.1); }
+.chip.device:hover { background:#0891b2;color:white;border-color:#0891b2; }
+.chip.attack { border-color:rgba(239,68,68,0.4);color:#f87171;background:rgba(239,68,68,0.1); }
+.chip.attack:hover { background:#dc2626;color:white;border-color:#dc2626; }
+.chip.tool { border-color:rgba(234,179,8,0.4);color:#fbbf24;background:rgba(234,179,8,0.1); }
+.chip.tool:hover { background:#d97706;color:white;border-color:#d97706; }
+.chip.hacker { border-color:rgba(168,85,247,0.4);color:#c084fc;background:rgba(168,85,247,0.1); }
+.chip.hacker:hover { background:#9333ea;color:white;border-color:#9333ea; }
+.chip.security { border-color:rgba(34,197,94,0.4);color:#86efac;background:rgba(34,197,94,0.08);cursor:pointer; }
+.chip.security:hover { background:#16a34a;color:white;border-color:#16a34a; }
+.chip.target { border-color:rgba(249,115,22,0.4);color:#fb923c;background:rgba(249,115,22,0.1); }
+.chip.target:hover { background:#ea580c;color:white;border-color:#ea580c; }
+.chip.vendor { border-color:rgba(59,130,246,0.4);color:#93c5fd;background:rgba(59,130,246,0.1); }
+.chip.vendor:hover { background:#2563eb;color:white;border-color:#2563eb; }
+
+/* NEW AUTO-LINK STYLES */
+.glossary-link { color: #818cf8; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; cursor: pointer; transition: all 0.2s ease; font-weight: 600; }
+.glossary-link:hover { color: #c084fc; background: rgba(168,85,247,0.1); border-radius: 4px; }
+
+.tooltip-container { position:relative;display:inline-block; }
+.tooltip-popup {
+  position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
+  background:#0d1525;border:1px solid rgba(34,197,94,0.4);border-radius:12px;
+  padding:14px 16px;width:280px;z-index:9999;
+  box-shadow:0 8px 32px rgba(0,0,0,0.6);
+  opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;
+  transform:translateX(-50%) translateY(6px);
+}
+.tooltip-container:hover .tooltip-popup { opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0); }
+.tooltip-popup::after { content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%); border:6px solid transparent;border-top-color:rgba(34,197,94,0.4); }
+.tooltip-title { font-size:12px;font-weight:800;color:#86efac;margin-bottom:6px;display:flex;align-items:center;gap:6px; }
+.tooltip-desc { font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:8px; }
+.tooltip-meta { display:flex;flex-wrap:wrap;gap:4px; }
+.tooltip-tag { font-size:10px;padding:2px 7px;border-radius:4px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);color:#86efac; }
+
+.functions-list { list-style:none; }
+.functions-list li { display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-secondary);line-height:1.5; }
+.functions-list li:last-child { border-bottom:none; }
+.fn-icon { width:20px;height:20px;border-radius:5px;background:var(--layer-color);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px;opacity:0.8; }
+
+.threat-overview { background:linear-gradient(135deg,rgba(220,38,38,0.1),rgba(153,27,27,0.05));border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:16px;margin-bottom:16px; }
+.threat-overview p { font-size:13px;color:var(--text-secondary);line-height:1.6; }
+.threat-overview strong { color:#fca5a5; }
+
+.modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.3s; }
+.modal-overlay.show { opacity:1;pointer-events:all; }
+.modal { background:#131c2e;border:1px solid var(--border);border-radius:20px;max-width:720px;width:100%;max-height:88vh;overflow-y:auto;transform:scale(0.95) translateY(10px);transition:all 0.3s;position:relative; }
+.modal-overlay.show .modal { transform:scale(1) translateY(0); }
+.modal-header { padding:24px 28px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#131c2e;z-index:1; }
+.modal-header-top { display:flex;align-items:flex-start;justify-content:space-between;gap:16px; }
+.modal-close { width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s; }
+.modal-close:hover { border-color:var(--red);color:var(--red); }
+.modal-type-badge { font-size:10px;padding:3px 10px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;display:inline-block; }
+.modal-title { font-size:22px;font-weight:800;margin-bottom:4px; }
+.modal-subtitle { font-size:13px;color:var(--text-secondary); }
+.modal-body { padding:24px 28px; }
+@media(max-width:600px){.modal-header,.modal-body{padding:16px;}}
+.modal-section { margin-bottom:20px; }
+.modal-section-title { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:8px; }
+.modal-section-title::after { content:'';flex:1;height:1px;background:var(--border); }
+.modal-desc { font-size:14px;color:var(--text-secondary);line-height:1.7;margin-bottom:12px; }
+.modal-list { list-style:none; }
+.modal-list li { display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-secondary); }
+.modal-list li:last-child { border-bottom:none; }
+.modal-list-icon { flex-shrink:0;margin-top:1px; }
+.info-row { display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px; }
+.info-row:last-child { border-bottom:none; }
+.info-key { color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:0.05em; }
+.info-val { color:var(--text-primary);font-weight:600; }
+.warning-box { background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:14px;margin-top:12px; }
+.warning-box-title { font-size:12px;font-weight:700;color:#fca5a5;margin-bottom:6px;display:flex;align-items:center;gap:6px; }
+.warning-box p { font-size:13px;color:var(--text-secondary);line-height:1.5; }
+.tip-box { background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:14px;margin-top:12px; }
+.tip-box-title { font-size:12px;font-weight:700;color:#86efac;margin-bottom:6px;display:flex;align-items:center;gap:6px; }
+.tip-box p { font-size:13px;color:var(--text-secondary);line-height:1.5; }
+.info-box { background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:14px;margin-top:12px; }
+.info-box-title { font-size:12px;font-weight:700;color:#93c5fd;margin-bottom:6px;display:flex;align-items:center;gap:6px; }
+.info-box p { font-size:13px;color:var(--text-secondary);line-height:1.5; }
+.cvss-badge { display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:700; }
+.cvss-critical { background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#f87171; }
+.cvss-high { background:rgba(249,115,22,0.2);border:1px solid rgba(249,115,22,0.4);color:#fb923c; }
+.cvss-medium { background:rgba(234,179,8,0.2);border:1px solid rgba(234,179,8,0.4);color:#fbbf24; }
+.cvss-low { background:rgba(34,197,94,0.2);border:1px solid rgba(34,197,94,0.25);color:#86efac; }
+.timeline { position:relative;padding-left:24px; }
+.timeline::before { content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--red),transparent); }
+.timeline-item { position:relative;margin-bottom:16px; }
+.timeline-dot { position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--red);border:2px solid var(--bg-primary); }
+.timeline-content { background:var(--bg-secondary);border:1px solid rgba(239,68,68,0.15);border-radius:8px;padding:12px; }
+.timeline-step { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#f87171;margin-bottom:4px; }
+.timeline-desc { font-size:13px;color:var(--text-secondary);line-height:1.5; }
+
+.hacker-hero { background:linear-gradient(135deg,rgba(220,38,38,0.12),rgba(153,27,27,0.06),rgba(10,14,26,0));border:1px solid rgba(239,68,68,0.25);border-radius:20px;padding:32px;text-align:center;margin-bottom:28px; }
+.hacker-hero h2 { font-size:28px;font-weight:800;color:#fca5a5;margin:12px 0 8px; }
+.hacker-hero p { color:var(--text-secondary);font-size:15px;max-width:600px;margin:0 auto; }
+.hacker-section-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:24px; }
+.hacker-card { background:var(--bg-card);border:1px solid rgba(239,68,68,0.15);border-radius:14px;overflow:hidden;transition:all 0.3s; }
+.hacker-card:hover { transform:translateY(-3px);box-shadow:0 16px 40px rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.35); }
+.hacker-card-header { padding:16px 18px;border-bottom:1px solid rgba(239,68,68,0.1);background:rgba(239,68,68,0.05);display:flex;align-items:center;gap:12px; }
+.hacker-card-icon { font-size:24px;flex-shrink:0; }
+.hacker-card-title { font-size:15px;font-weight:700;color:#fca5a5; }
+.hacker-card-sub { font-size:12px;color:var(--text-muted); }
+.hacker-card-body { padding:16px 18px; }
+.hacker-who-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px; }
+.who-card { background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all 0.25s;text-align:center; }
+.who-card:hover { transform:translateY(-3px); }
+.who-card .who-icon { font-size:32px;margin-bottom:8px; }
+.who-card .who-name { font-size:13px;font-weight:700;margin-bottom:4px; }
+.who-card .who-desc { font-size:11px;color:var(--text-muted); }
+
+.quiz-container { max-width:680px;margin:0 auto; }
+.quiz-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px; }
+.quiz-progress-bar { height:6px;background:var(--bg-card);border-radius:100px;overflow:hidden;flex:1; }
+.quiz-progress-fill { height:100%;background:linear-gradient(90deg,#4f46e5,#7c3aed);border-radius:100px;transition:width 0.5s ease; }
+.quiz-score { font-size:13px;font-weight:700;color:var(--text-secondary);white-space:nowrap; }
+.quiz-card { background:var(--bg-card);border:1px solid var(--border);border-radius:20px;overflow:hidden; }
+.quiz-q-header { padding:22px 26px;border-bottom:1px solid var(--border);background:var(--bg-secondary); }
+.quiz-q-num { font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px; }
+.quiz-question { font-size:17px;font-weight:700;line-height:1.4; }
+.quiz-options { padding:18px 26px;display:flex;flex-direction:column;gap:9px; }
+.quiz-option { padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-secondary);cursor:pointer;transition:all 0.2s;font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:12px; }
+.quiz-option:hover:not(.selected):not(.correct):not(.wrong) { border-color:#4f46e5;color:var(--text-primary);background:rgba(79,70,229,0.08); }
+.quiz-option.correct { border-color:#22c55e;background:rgba(34,197,94,0.1);color:#86efac; }
+.quiz-option.wrong { border-color:#ef4444;background:rgba(239,68,68,0.1);color:#fca5a5; }
+.option-letter { width:26px;height:26px;border-radius:7px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all 0.2s; }
+.quiz-option.correct .option-letter { background:#22c55e;color:white; }
+.quiz-option.wrong .option-letter { background:#ef4444;color:white; }
+.quiz-footer { padding:18px 26px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px; }
+.quiz-explanation { font-size:13px;color:var(--text-secondary);line-height:1.5;flex:1;display:none; }
+.quiz-explanation.show { display:block; }
+.quiz-explanation strong { color:#818cf8; }
+.btn { padding:9px 18px;border-radius:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s; }
+.btn-primary { background:linear-gradient(135deg,#4f46e5,#7c3aed);color:white; }
+.btn-primary:hover { transform:translateY(-2px);box-shadow:0 8px 20px rgba(79,70,229,0.4); }
+.btn-primary:disabled { opacity:0.5;cursor:not-allowed;transform:none; }
+.btn-ghost { background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border); }
+.btn-ghost:hover { color:var(--text-primary);border-color:#4f46e5; }
+.quiz-result { text-align:center;padding:50px 32px;display:none; }
+.quiz-result.show { display:block; }
+.result-score { font-size:64px;font-weight:900;background:linear-gradient(135deg,#4f46e5,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin:16px 0 10px; }
+
+.encap-container { max-width:840px;margin:0 auto; }
+.encap-steps { display:flex;flex-direction:column;gap:0; }
+.encap-step { display:flex;align-items:stretch;gap:14px; }
+.encap-step-line { display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:38px; }
+.encap-dot { width:38px;height:38px;border-radius:10px;background:var(--layer-color);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white;flex-shrink:0;transition:transform 0.2s; }
+.encap-connector { width:2px;flex:1;margin:4px auto;min-height:18px;opacity:0.4; }
+.encap-content { flex:1;padding:0 0 20px 0; }
+.encap-header { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
+.encap-header h3 { font-size:15px;font-weight:700; }
+.pdu-tag { font-size:10px;padding:2px 8px;border-radius:5px;border:1px solid;font-weight:700;text-transform:uppercase; }
+.encap-packet { display:flex;align-items:stretch;border-radius:8px;overflow:hidden;border:1px solid var(--border);font-size:10px;font-weight:700;height:34px; }
+.encap-segment { display:flex;align-items:center;justify-content:center;padding:0 8px;white-space:nowrap;border-right:1px solid rgba(255,255,255,0.05); }
+.encap-segment:last-child{border-right:none;}
+.seg-data{flex:1;background:rgba(255,255,255,0.04);color:var(--text-muted);}
+.seg-l7{background:rgba(249,115,22,0.25);color:#fed7aa;}
+.seg-l6{background:rgba(168,85,247,0.25);color:#e9d5ff;}
+.seg-l5{background:rgba(236,72,153,0.25);color:#fbcfe8;}
+.seg-l4{background:rgba(6,182,212,0.25);color:#a5f3fc;}
+.seg-l3{background:rgba(34,197,94,0.25);color:#bbf7d0;}
+.seg-l2h{background:rgba(234,179,8,0.25);color:#fef08a;}
+.seg-l2t{background:rgba(234,179,8,0.25);color:#fef08a;}
+.seg-l1{background:rgba(239,68,68,0.2);color:#fca5a5;font-size:8px;letter-spacing:0.1em;}
+
+.mindmap-wrapper { background:var(--bg-card);border:1px solid var(--border);border-radius:20px;overflow:hidden;position:relative; }
+.mindmap-controls { position:absolute;top:14px;right:14px;z-index:10;display:flex;flex-direction:column;gap:6px; }
+.mm-btn { width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s; }
+.mm-btn:hover { background:var(--bg-card-hover);color:var(--text-primary);border-color:#4f46e5; }
+#mindmapCanvas { display:block;cursor:grab; }
+#mindmapCanvas:active { cursor:grabbing; }
+
+.comparison-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px; }
+.compare-card { background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all 0.3s; }
+.compare-card:hover { transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,0.3);border-color:var(--layer-color); }
+.compare-card-header { padding:14px 18px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden; }
+.compare-card-header::before { content:'';position:absolute;inset:0;background:var(--layer-color);opacity:0.1; }
+.compare-card-body { padding:14px 18px; }
+.compare-row { display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px; }
+.compare-row:last-child{border-bottom:none;}
+.compare-key { color:var(--text-muted);font-size:10px;text-transform:uppercase;letter-spacing:0.05em; }
+.compare-val { color:var(--text-primary);font-weight:600;text-align:right;max-width:60%; }
+
+.search-bar { display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:9px 14px;margin-bottom:20px;max-width:460px;margin-left:auto;margin-right:auto; }
+.search-bar input { flex:1;background:none;border:none;color:var(--text-primary);font-size:13px;outline:none; }
+.search-bar input::placeholder{color:var(--text-muted);}
+
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.fade-in { animation:fadeIn 0.35s ease forwards; }
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg-primary);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:100px;}
+::-webkit-scrollbar-thumb:hover{background:#4f46e5;}
+footer { text-align:center;padding:40px 0 24px;color:var(--text-muted);font-size:13px; }
+footer a{color:#818cf8;text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-header-top">
+        <div id="modalHeaderContent">
+          <!-- Back button and titles injected here via JS -->
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="header-badge">Interactive Security Learning</div>
+    <h1>OSI Model — Deep Dive</h1>
+    <p class="header-sub">Explore all 7 layers — click protocols, devices, attacks & hacker tools for in-depth explanations.</p>
+  </header>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" onclick="switchView('stack',this)">🗂️ Layer Explorer</button>
+    <button class="nav-tab" onclick="switchView('mindmap',this)">🧠 Mind Map</button>
+    <button class="nav-tab" onclick="switchView('comparison',this)">📊 Comparison</button>
+    <button class="nav-tab" onclick="switchView('encapsulation',this)">📦 Encapsulation</button>
+    <button class="nav-tab danger-tab" onclick="switchView('hackers',this)">💀 Hacker Hub</button>
+    <button class="nav-tab" onclick="switchView('quiz',this)">🧩 Quiz</button>
+  </nav>
+
+  <div id="view-stack" class="view active">
+    <div class="stack-container">
+      <div class="layer-stack" id="layerStack"></div>
+      <div class="detail-panel" id="detailPanel"></div>
+    </div>
+  </div>
+
+  <div id="view-mindmap" class="view">
+    <div class="mindmap-wrapper">
+      <div class="mindmap-controls">
+        <button class="mm-btn" onclick="mmZoom(1.2)">+</button>
+        <button class="mm-btn" onclick="mmZoom(0.8)">−</button>
+        <button class="mm-btn" onclick="mmReset()">⟳</button>
+      </div>
+      <canvas id="mindmapCanvas"></canvas>
+    </div>
+    <p style="text-align:center;color:var(--text-muted);font-size:12px;margin-top:10px;">Drag to pan · Scroll to zoom · Click nodes to highlight</p>
+  </div>
+
+  <div id="view-comparison" class="view">
+    <div class="search-bar">
+      <span style="color:var(--text-muted)">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search layers, protocols, devices..." oninput="filterComparison()">
+    </div>
+    <div class="comparison-grid" id="comparisonGrid"></div>
+  </div>
+
+  <div id="view-encapsulation" class="view">
+    <div class="encap-container">
+      <div style="text-align:center;margin-bottom:28px;">
+        <h2 style="font-size:26px;font-weight:800;margin-bottom:6px;">Data Encapsulation</h2>
+        <p style="color:var(--text-secondary);">How data travels down the OSI stack from Application to Physical layer</p>
+      </div>
+      <div class="encap-steps" id="encapSteps"></div>
+    </div>
+  </div>
+
+  <div id="view-hackers" class="view">
+    <div id="hackerHubContent"></div>
+  </div>
+
+  <div id="view-quiz" class="view">
+    <div class="quiz-container">
+      <div class="quiz-header">
+        <span style="font-size:12px;font-weight:700;color:var(--text-muted);">Q <span id="qNum">1</span></span>
+        <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill" style="width:0%"></div></div>
+        <span class="quiz-score">✅ <span id="qScore">0</span>/<span id="qTotal">0</span></span>
+      </div>
+      <div class="quiz-card" id="quizCard"></div>
+      <div class="quiz-result" id="quizResult">
+        <div style="font-size:48px">🎓</div>
+        <div class="result-score" id="resultScore">0%</div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:6px" id="resultMsg"></div>
+        <div style="color:var(--text-secondary);margin-bottom:28px;font-size:14px" id="resultSub"></div>
+        <button class="btn btn-primary" onclick="restartQuiz()">🔄 Try Again</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>OSI Model Interactive Learning Hub · Open Source · All 7 Layers + Security Coverage</footer>
+</div>
+
+<script>
+// ═══ CENTRAL GLOSSARY DB (NEW) ═══
+const GLOSSARY_DB = {
+  "Layer 1": "The Physical Layer. Handles raw bit transmission over physical media like cables, radio frequencies, and fiber optics.",
+  "Layer 2": "The Data Link Layer. Handles node-to-node frame transfer using MAC addresses (e.g., Ethernet, Wi-Fi, switches).",
+  "Layer 3": "The Network Layer. Manages logical IP addressing and routing packets across multiple networks (e.g., IPv4, routers, BGP).",
+  "Layer 4": "The Transport Layer. Ensures reliable end-to-end communication via segments using TCP or UDP.",
+  "Layer 5": "The Session Layer. Establishes, maintains, and terminates communication sessions and authentication states.",
+  "Layer 6": "The Presentation Layer. Translates data formats, encrypts data (TLS/SSL), and handles compression.",
+  "Layer 7": "The Application Layer. The interface directly interacting with user software and defining high-level protocols (HTTP, DNS).",
+  "Layer 4/7": "Controls or attacks that can operate at either the Transport layer (L4) or the Application layer (L7).",
+  "Layer 4-7": "Security mechanisms that inspect traffic across multiple upper layers, looking past raw IP routing to application content.",
+  "Layer 5-7": "The upper layers of the OSI model, collectively responsible for session management, encryption, and application interaction.",
+  "Layer 3-7": "Comprehensive filtering ranging from IP-level routing down to deep application payload inspection (common in NGFWs).",
+  "HTTP/HTTPS": "HyperText Transfer Protocol (Secure). The fundamental communication protocol of the web. HTTPS adds TLS encryption.",
+  "Signature-Based": "A detection method that relies on a database of known malicious patterns (signatures) to identify threats.",
+  "Behavioral Analysis": "A detection method that observes standard network or user behavior and flags deviations or anomalies as potential threats.",
+  "Authorization": "The process of verifying whether an authenticated user has the permissions required to access a specific resource.",
+  "Token-Based": "An authentication approach where a cryptographic token (like a JWT) is used to verify identity, rather than sending a password with every request.",
+  "REST APIs": "Representational State Transfer. A standard architectural style for building network applications and web services.",
+  "Stateless Auth": "An authentication method (like JWT) where the server does not need to store session data; all necessary verification data is kept in the token itself.",
+  "Claims-Based": "Authentication where a token contains specific pieces of information (claims) about the user (e.g., role, email, expiry).",
+  "Base64 Encoded": "A common binary-to-text encoding scheme. It is NOT encryption and can be easily decoded by anyone.",
+  "Encryption": "The cryptographic process of encoding data so that it can only be accessed or read by someone with the correct decryption key.",
+  "X.509 Certs": "The standard format for digital public key certificates, commonly used in TLS/SSL to verify website identities.",
+  "Forward Secrecy": "A cryptographic feature ensuring that even if a server's private key is compromised in the future, past encrypted communications cannot be decrypted.",
+  "Static Credential": "A credential (like an API Key or password) that does not change automatically or frequently, making it highly vulnerable if leaked.",
+  "Rate Limiting": "Restricting the number of requests a user, IP, or token can make to a server in a specific timeframe to prevent abuse.",
+  "Developer Auth": "Authentication mechanisms (like API keys) designed specifically for programmatic, machine-to-machine access rather than human users.",
+  "Bot Detection": "Security mechanisms designed to differentiate automated scripts and malicious bots from legitimate human users.",
+  "Turing Test": "A test of a machine's ability to exhibit intelligent behavior equivalent to, or indistinguishable from, that of a human (e.g., CAPTCHAs).",
+  "Symmetric": "Encryption where the same secret key is used for both encrypting and decrypting the data (e.g., AES). Extremely fast.",
+  "Block Cipher": "A method of symmetric encryption that processes data in fixed-size blocks (e.g., AES processes 128-bit blocks).",
+  "NIST Standard": "Security guidelines and standards established by the US National Institute of Standards and Technology.",
+  "Asymmetric": "Public-Key cryptography. Uses two mathematically linked keys: a public key for encryption, and a private key for decryption (e.g., RSA).",
+  "Public Key": "The publicly shareable half of an asymmetric key pair, used by others to encrypt messages intended for the key owner.",
+  "Digital Signatures": "A mathematical scheme used to verify the authenticity and integrity of a message or document, proving it wasn't tampered with.",
+  "PKI": "Public Key Infrastructure. The entire framework of policies, servers, and software managing digital certificates and public-key encryption.",
+  "Trust Chain": "A hierarchical chain of certificates linking an end-entity certificate back to a trusted root Certificate Authority.",
+  "CA-Signed": "A digital certificate that has been cryptographically signed and verified by a recognized Certificate Authority.",
+  "TCP Defense": "Mechanisms designed specifically to protect the stateful TCP handshake process from resource exhaustion.",
+  "Stateless": "A system or protocol (like UDP or SYN Cookies) that does not require the server to retain session information.",
+  "Anti-DoS": "Mechanisms (Denial of Service mitigation) designed to absorb or drop malicious volumetric traffic while allowing legitimate users.",
+  "Threshold Control": "Setting specific numerical limits on network behavior (e.g., max 100 requests per minute) before blocking traffic.",
+  "429 Response": "The HTTP status code for 'Too Many Requests', sent when a client hits a rate limit.",
+  "Token Bucket": "A common algorithm used in network traffic shaping and rate limiting to control the flow of data injections.",
+  "ACL": "Access Control List. A sequential list of permit or deny rules applied to network interfaces to filter IP traffic.",
+  "Default-Deny": "A core security posture where everything is blocked by default, and only explicitly approved traffic is permitted.",
+  "Stateful": "A firewall or protocol that keeps track of the operating state and characteristics of active network connections.",
+  "Content Inspection": "Opening and analyzing the payload of a packet (Layer 7 data) rather than just looking at the IP/Port headers.",
+  "IDS/IPS": "Intrusion Detection/Prevention Systems. Network security appliances that monitor traffic for malicious activity and either log it or actively block it.",
+  "Signature Matching": "Comparing network packet payloads against a database of known byte sequences associated with malware or exploits.",
+  "VPN": "Virtual Private Network. Creates a secure, encrypted tunnel over an untrusted network (the internet) connecting remote users or sites.",
+  "Authentication": "The process of verifying the identity of a user, device, or system (proving you are who you say you are).",
+  "Packet Filtering": "The most basic firewall technique: inspecting incoming and outgoing packets and dropping them based on source/destination IPs and ports.",
+  "Permit/Deny": "The binary decision made by routers and firewalls when evaluating traffic against an Access Control List.",
+  "Interface-Based": "Security controls that are applied directly to a specific physical or virtual port on a network device.",
+  "DNS Signing": "Using cryptography (DNSSEC) to digitally sign DNS records, preventing attackers from injecting fake IP resolutions.",
+  "RFC 4033-4035": "The official Internet Engineering Task Force (IETF) specifications defining the DNSSEC protocol.",
+  "BGP Security": "Frameworks (like RPKI) designed to add cryptographic trust to the Border Gateway Protocol to prevent route hijacking.",
+  "Route Origin Auth": "ROA. A cryptographically signed object in RPKI stating which Autonomous System is authorized to originate a specific IP prefix.",
+  "PKI-Based": "Relying on a Public Key Infrastructure hierarchy of certificates to establish trust.",
+  "Network Isolation": "Separating different parts of a network (using VLANs or physical firewalls) to prevent lateral movement by attackers.",
+  "802.1Q": "The networking standard that supports Virtual LANs (VLANs) on an Ethernet network via frame tagging.",
+  "Broadcast Domains": "A logical division of a network where all nodes can reach each other via broadcast at Layer 2. Separated by routers.",
+  "CAM Table": "Content Addressable Memory table. Used by switches to map MAC addresses to specific physical ports.",
+  "MAC Limiting": "A port security feature that restricts the number of unique MAC addresses allowed to communicate through a single switch port.",
+  "Anti-Flooding": "Mechanisms designed to prevent attackers from overwhelming switch CAM tables or network bandwidth.",
+  "RADIUS": "Remote Authentication Dial-In User Service. A centralized protocol for authenticating users who are trying to access a network.",
+  "EAP": "Extensible Authentication Protocol. A framework used heavily in wireless networks and 802.1X for passing authentication credentials safely.",
+  "NAC": "Network Access Control. The overarching concept of restricting network availability to endpoint devices based on their security posture and authentication.",
+  "STP Security": "Spanning Tree Protocol security features (like BPDU Guard) that prevent attackers from manipulating network topology to intercept traffic.",
+  "Root Bridge Protection": "Preventing an unauthorized or malicious switch from claiming leadership (root) of the Spanning Tree topology.",
+  "Port Shutdown": "A security response where a switch port disables itself completely upon detecting a violation (e.g., BPDU Guard violation).",
+  "Allowlist": "A strict security policy where only explicitly identified items (IPs, MACs, applications) are permitted, and all others are blocked.",
+  "Weak Control": "A security mechanism (like MAC filtering) that is trivial for an attacker to bypass and should not be relied upon alone.",
+  "Easily Bypassed": "Security measures that offer a false sense of security because common attacker tools can spoof or circumvent them instantly.",
+  "Physical Security": "Protections related to tangible assets: locks, cameras, mantraps, and guards preventing unauthorized bodily access to hardware.",
+  "Perimeter": "The conceptual boundary between a private, secure corporate network and the untrusted public internet.",
+  "Defense in Depth": "An information security approach where multiple layers of defense are placed throughout an IT system. If one fails, others catch the threat.",
+  "Ticket-Based": "Authentication (like Kerberos) where users receive an encrypted 'ticket' proving their identity, removing the need to send passwords.",
+  "Active Directory": "Microsoft's directory service used for Windows domain networks. The central authority for enterprise identity and access.",
+  "SSO": "Single Sign-On. An authentication property allowing a user to log in once and gain access to multiple disparate, independent software systems.",
+  "AAA": "Authentication, Authorization, and Accounting. The framework for intelligently controlling access to computer resources and tracking usage.",
+  "Centralized Auth": "Relying on a single authority (like a RADIUS or AD server) to handle log-ins for all network devices, rather than local accounts.",
+  "NAS Protocol": "Network Access Server protocol. The communication between edge devices (switches/VPNs) and the central authentication server.",
+  "Stateful Session": "A web connection where the server remembers the identity and context of the user across multiple individual HTTP requests.",
+  "Cookie-Based": "Web authentication relying on the browser storing a session ID in an HTTP cookie, sent automatically with every request.",
+  "Web Auth": "Mechanisms specific to identifying users in web browsers, such as JWTs, Cookies, and OAuth flows.",
+  "Challenge-Response": "An authentication process where the server asks a mathematical question (challenge), and the client provides a calculated answer (response) proving they know the password without sending it.",
+  "PPP": "Point-to-Point Protocol. A data link layer protocol used to establish a direct connection between two nodes.",
+  "Hash-Based": "Using cryptographic hash functions (one-way math) to obscure data, check integrity, or process authentication.",
+  "NGFW": "Next-Generation Firewall. A firewall combining traditional port filtering with deep packet inspection, application awareness, and intrusion prevention.",
+  "Perimeter Security": "Firewalls and edge devices designed to keep external threats out of the internal network.",
+  "HMAC": "Hash-based Message Authentication Code. A specific type of MAC involving a cryptographic hash function and a secret cryptographic key, ensuring message integrity and authenticity.",
+  "Routing Security": "Protecting the protocols (BGP, OSPF) that dictate how traffic moves across the internet to prevent hijacking or misdirection.",
+  "Peer Verification": "Ensuring that the router or node communicating with your system is cryptographically proven to be who they claim to be."
+};
+
+// ═══ AUTO-LINKER ENGINE ═══
+const glossaryKeys = Object.keys(GLOSSARY_DB).sort((a, b) => b.length - a.length);
+const escapedKeys = glossaryKeys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+const glossaryRegex = new RegExp(`(^|\\W)(${escapedKeys.join('|')})(?=\\W|$)`, 'gi');
+
+function autoLink(text) {
+  if (!text) return '';
+  const parts = text.split(/(<[^>]*>)/);
+  for (let i = 0; i < parts.length; i++) {
+    if (!parts[i].startsWith('<')) {
+      parts[i] = parts[i].replace(glossaryRegex, (match, prefix, coreMatch) => {
+        const actualKey = glossaryKeys.find(k => k.toLowerCase() === coreMatch.toLowerCase()) || coreMatch;
+        return `${prefix}<span class="glossary-link" onclick="openModal('glossary', '${actualKey.replace(/'/g,"\\'")}')">${coreMatch}</span>`;
+      });
+    }
+  }
+  return parts.join('');
+}
+
+// ═══ VENDOR DB ═══
+const VENDOR_DB = {
+  "Cloudflare WAF": { category: "Web Security", products: ["Cloudflare WAF"], desc: "Cloud-based Web Application Firewall." },
+  "AWS WAF": { category: "Cloud Security", products: ["AWS WAF", "Shield"], desc: "Native cloud WAF protecting web applications." },
+  "Akamai Kona": { category: "Edge Security", products: ["Kona Site Defender"], desc: "DDoS and Web Application protection at the edge." },
+  "ModSecurity": { category: "Open Source WAF", products: ["ModSecurity"], desc: "The most widely deployed open source WAF engine." },
+  "F5 Advanced WAF": { category: "Enterprise WAF", products: ["BIG-IP", "Advanced WAF"], desc: "Enterprise-grade application security." },
+  "Google": { category: "Identity & Cloud", products: ["Google Identity", "reCAPTCHA v3", "BoringSSL"], desc: "Global technology provider." },
+  "GitHub": { category: "Developer Tools", products: ["GitHub OAuth"], desc: "Developer platform." },
+  "Microsoft (MSAL)": { category: "Identity", products: ["MSAL", "Azure AD"], desc: "Microsoft Authentication Library." },
+  "Auth0": { category: "Identity Management", products: ["Auth0 Identity Platform"], desc: "Authentication and authorization as a service." },
+  "Okta": { category: "Identity Management", products: ["Okta Workforce Identity"], desc: "Enterprise identity provider." },
+  "OpenSSL": { category: "Cryptography", products: ["OpenSSL Library"], desc: "Robust, commercial-grade, and full-featured toolkit for TLS and SSL." },
+  "BoringSSL (Google)": { category: "Cryptography", products: ["BoringSSL"], desc: "Google's fork of OpenSSL." },
+  "Let's Encrypt (free certs)": { category: "Certificate Authority", products: ["Let's Encrypt CA"], desc: "Free, automated, and open Certificate Authority." },
+  "DigiCert": { category: "Certificate Authority", products: ["SSL/TLS Certificates", "PKI"], desc: "Global provider of digital trust." },
+  "AWS (IAM keys)": { category: "Cloud Security", products: ["AWS IAM"], desc: "Identity and Access Management for AWS." },
+  "Google Cloud": { category: "Cloud Provider", products: ["GCP API Keys", "Cloud IAM"], desc: "Google Cloud Platform security controls." },
+  "Stripe": { category: "Fintech", products: ["Stripe API Keys"], desc: "Payment processing infrastructure." },
+  "Twilio": { category: "Communications", products: ["Twilio API Keys"], desc: "Cloud communications platform." },
+  "Google reCAPTCHA v3": { category: "Bot Detection", products: ["reCAPTCHA v3"], desc: "Frictionless bot protection." },
+  "hCaptcha": { category: "Bot Detection", products: ["hCaptcha"], desc: "Privacy-focused bot protection." },
+  "Cloudflare Turnstile": { category: "Bot Detection", products: ["Turnstile"], desc: "User-friendly, privacy-preserving CAPTCHA alternative." },
+  "AWS WAF CAPTCHA": { category: "Bot Detection", products: ["AWS WAF CAPTCHA"], desc: "Integrated CAPTCHA for AWS WAF." },
+  "Windows BitLocker": { category: "Endpoint Security", products: ["BitLocker"], desc: "Full volume encryption feature included with Microsoft Windows." },
+  "Apple FileVault": { category: "Endpoint Security", products: ["FileVault 2"], desc: "Disk encryption program in macOS." },
+  "VeraCrypt": { category: "Endpoint Security", products: ["VeraCrypt"], desc: "Open-source disk encryption software." },
+  "Sectigo": { category: "Certificate Authority", products: ["SSL Certificates", "PKI"], desc: "Commercial Certificate Authority." },
+  "GlobalSign": { category: "Certificate Authority", products: ["SSL Certificates"], desc: "Commercial Certificate Authority." },
+  "Comodo": { category: "Certificate Authority", products: ["SSL Certificates"], desc: "Commercial Certificate Authority." },
+  "Linux kernel (enabled automatically)": { category: "OS Security", products: ["Linux TCP/IP Stack"], desc: "Built-in protection in the Linux kernel." },
+  "FreeBSD": { category: "OS Security", products: ["FreeBSD TCP/IP Stack"], desc: "Highly secure UNIX-like operating system." },
+  "Windows Server": { category: "OS Security", products: ["Windows TCP/IP Stack"], desc: "Microsoft's server operating system." },
+  "Cisco IOS": { category: "Network Infrastructure", products: ["Cisco Routers/Switches"], desc: "Internetwork Operating System used on Cisco routers and network switches." },
+  "NGINX (limit_req)": { category: "Web Server", products: ["NGINX Open Source", "NGINX Plus"], desc: "High-performance web server and reverse proxy." },
+  "AWS API Gateway": { category: "Cloud Services", products: ["Amazon API Gateway"], desc: "Fully managed service for creating, publishing, maintaining, monitoring, and securing APIs." },
+  "Kong": { category: "API Gateway", products: ["Kong Gateway"], desc: "Cloud-native API gateway." },
+  "Redis (INCR+EXPIRE)": { category: "Data Store", products: ["Redis"], desc: "In-memory data structure store, used as a database, cache, and message broker." },
+  "iptables/nftables (Linux)": { category: "Firewall", products: ["iptables", "nftables"], desc: "User-space utility programs that allow a system administrator to configure the IP packet filter rules." },
+  "Windows Firewall": { category: "Firewall", products: ["Windows Defender Firewall"], desc: "Host-based firewall component of Microsoft Windows." },
+  "Cisco ACL": { category: "Network Security", products: ["Cisco IOS ACLs"], desc: "Access Control Lists on Cisco equipment." },
+  "pf (FreeBSD)": { category: "Firewall", products: ["Packet Filter (pf)"], desc: "Stateful packet filter used in BSD systems." },
+  "pfSense": { category: "Firewall", products: ["pfSense Firewall"], desc: "Open source firewall/router computer software distribution based on FreeBSD." },
+  "Palo Alto NGFW": { category: "Enterprise Firewall", products: ["Strata NGFW"], desc: "Next-Generation Firewalls from Palo Alto Networks." },
+  "Snort/Suricata (open source IDS/IPS)": { category: "IDS/IPS", products: ["Snort", "Suricata"], desc: "Open-source network intrusion detection systems." },
+  "Zeek (Bro)": { category: "Network Security Monitor", products: ["Zeek"], desc: "Open-source network security monitoring framework." },
+  "Cisco Firepower": { category: "Enterprise Firewall", products: ["Firepower Threat Defense (FTD)"], desc: "Cisco's Next-Generation Firewall platform." },
+  "Cisco IOS IPSec": { category: "VPN Infrastructure", products: ["Cisco IOS"], desc: "IPSec implementation on Cisco devices." },
+  "strongSwan (Linux)": { category: "VPN Software", products: ["strongSwan"], desc: "Open-source IPsec-based VPN solution." },
+  "Windows L2TP/IPSec": { category: "VPN Software", products: ["Windows VPN Client"], desc: "Native Windows VPN client." },
+  "Palo Alto GlobalProtect": { category: "Remote Access", products: ["GlobalProtect"], desc: "Enterprise VPN and Zero Trust Network Access." },
+  "Juniper JunOS": { category: "Network Infrastructure", products: ["Juniper Routers/Switches"], desc: "Network operating system used in Juniper Networks routing, switching and security devices." },
+  "Cloudflare (1.1.1.1 validates DNSSEC)": { category: "DNS Provider", products: ["1.1.1.1 Public DNS"], desc: "Privacy-first DNS resolver." },
+  "Google DNS (8.8.8.8)": { category: "DNS Provider", products: ["Google Public DNS"], desc: "Free, global domain name system resolution service." },
+  "PowerDNS": { category: "DNS Software", products: ["PowerDNS Authoritative Server"], desc: "Open-source DNS server." },
+  "BIND 9": { category: "DNS Software", products: ["BIND"], desc: "The most widely used domain name system software on the Internet." },
+  "Cloudflare (RPKI deployment)": { category: "Network Provider", products: ["Cloudflare RPKI"], desc: "Implementation of RPKI to secure BGP routing." },
+  "NTT": { category: "Tier 1 ISP", products: ["Global IP Network"], desc: "Global telecommunications company." },
+  "Telia": { category: "Tier 1 ISP", products: ["Telia Carrier"], desc: "Multinational telecommunications company." },
+  "RIPE NCC (repository)": { category: "Regional Internet Registry", products: ["RIPE RPKI"], desc: "Regional Internet Registry (RIR) for Europe, the Middle East and parts of Central Asia." },
+  "Routinator (validator)": { category: "RPKI Validator", products: ["Routinator"], desc: "RPKI relying party software." },
+  "Cisco (VLANs 1-4094)": { category: "Network Infrastructure", products: ["Cisco Switches"], desc: "VLAN implementation on Cisco devices." },
+  "Arista": { category: "Network Infrastructure", products: ["Arista EOS"], desc: "Computer networking company." },
+  "Juniper": { category: "Network Infrastructure", products: ["Juniper EX Series"], desc: "Network hardware provider." },
+  "HPE Aruba": { category: "Network Infrastructure", products: ["Aruba Switches"], desc: "Networking vendor." },
+  "Palo Alto (security zones)": { category: "Enterprise Firewall", products: ["Palo Alto NGFW"], desc: "Zone-based firewalling." },
+  "Cisco Catalyst": { category: "Network Infrastructure", products: ["Catalyst Switches"], desc: "Brand for a variety of network switches sold by Cisco." },
+  "Aruba ProCurve": { category: "Network Infrastructure", products: ["ProCurve Switches"], desc: "Networking equipment from HP." },
+  "Dell EMC networking": { category: "Network Infrastructure", products: ["Dell PowerSwitch"], desc: "Networking portfolio from Dell Technologies." },
+  "Cisco ISE": { category: "Network Access Control", products: ["Identity Services Engine (ISE)"], desc: "Next-generation identity and access control policy platform." },
+  "Microsoft NPS": { category: "Network Access Control", products: ["Network Policy Server"], desc: "Microsoft's implementation of a RADIUS server and proxy." },
+  "FreeRADIUS": { category: "Network Access Control", products: ["FreeRADIUS"], desc: "Modular, high performance free RADIUS suite." },
+  "Aruba ClearPass": { category: "Network Access Control", products: ["ClearPass Policy Manager"], desc: "Agentless policy control and workflow automation." },
+  "Juniper Steel-Belted": { category: "Network Access Control", products: ["Steel-Belted Radius"], desc: "Legacy RADIUS server." },
+  "Cisco (PortFast BPDU Guard)": { category: "Switch Security", products: ["Cisco IOS"], desc: "STP security feature." },
+  "Juniper (edge ports)": { category: "Switch Security", products: ["JunOS"], desc: "STP security feature." },
+  "HPE": { category: "Network Infrastructure", products: ["HPE Networking"], desc: "Enterprise IT." },
+  "All managed switches and wireless APs": { category: "Generic Hardware", products: [], desc: "Standard feature across enterprise networking equipment." },
+  "Home routers": { category: "Consumer Hardware", products: [], desc: "Standard feature in consumer networking." },
+  "HID Global (access cards)": { category: "Physical Security", products: ["Smart Cards", "Readers"], desc: "Manufacturer of secure identity products." },
+  "Lenel": { category: "Physical Security", products: ["OnGuard"], desc: "Provider of advanced access control systems." },
+  "Software House": { category: "Physical Security", products: ["C•CURE 9000"], desc: "Security and event management technologies." },
+  "Verkada (cameras)": { category: "Physical Security", products: ["Security Cameras"], desc: "Cloud-based enterprise building security." },
+  "Iron Mountain (secure disposal)": { category: "Physical Security", products: ["Secure IT Asset Disposition"], desc: "Enterprise information management services." },
+  "Microsoft Active Directory": { category: "Directory Services", products: ["Active Directory (AD)"], desc: "Directory service developed by Microsoft." },
+  "MIT Kerberos": { category: "Authentication", products: ["MIT Kerberos V5"], desc: "Open source implementation of the Kerberos protocol." },
+  "Heimdal Kerberos": { category: "Authentication", products: ["Heimdal"], desc: "Implementation of Kerberos 5." },
+  "Apple macOS/iOS": { category: "Operating Systems", products: ["macOS", "iOS"], desc: "Apple's operating systems." },
+  "Okta RADIUS Agent": { category: "Identity", products: ["Okta RADIUS"], desc: "Agent allowing RADIUS clients to authenticate against Okta." },
+  "All web frameworks (Django, Rails, Express, Laravel)": { category: "Web Development", products: [], desc: "Standard web application frameworks." },
+  "PPP connections": { category: "Networking", products: [], desc: "Point-to-Point Protocol implementations." },
+  "L2TP/IPSec": { category: "VPN Infrastructure", products: [], desc: "Layer 2 Tunneling Protocol combined with IPsec." },
+  "Some RADIUS implementations": { category: "Network Access Control", products: [], desc: "Various RADIUS servers." },
+  "Fortinet FortiGate": { category: "Enterprise Firewall", products: ["FortiGate"], desc: "Next-generation firewalls." },
+  "Check Point": { category: "Enterprise Firewall", products: ["Quantum Security Gateways"], desc: "Cybersecurity provider." },
+  "Cisco AnyConnect": { category: "Remote Access", products: ["AnyConnect Secure Mobility Client"], desc: "Enterprise VPN client." },
+  "Cisco IOS (key chains)": { category: "Routing Security", products: ["Cisco IOS"], desc: "Route authentication mechanism." },
+  "Quagga/FRRouting": { category: "Routing Software", products: ["FRRouting"], desc: "Open-source routing protocol suite." }
+};
+
+// ═══ SECURITY MECHANISM DATABASE ═══
+const SECURITY_DB = {
+  "WAF": {
+    full:"Web Application Firewall", icon:"🛡️",
+    description:"A WAF inspects HTTP/HTTPS traffic between clients and web applications, blocking malicious requests based on signatures and behavioral rules. It operates at Layer 7 and can detect OWASP Top 10 attacks.",
+    howItWorks:["Inspects every HTTP/HTTPS request before it reaches the application","Matches request patterns against rule sets (SQLi, XSS, CSRF patterns)","Blocks, logs, or challenges suspicious requests","Can operate in detection mode (log only) or prevention mode (block)"],
+    protects:["SQL Injection","Cross-Site Scripting (XSS)","CSRF","HTTP Flooding","File Inclusion Attacks"],
+    vendors:["Cloudflare WAF","AWS WAF","Akamai Kona","ModSecurity","F5 Advanced WAF"],
+    limitations:"Cannot protect against zero-day vulnerabilities not in its rule set. Can generate false positives.",
+    tags:["Layer 7","HTTP/HTTPS","Signature-Based","Behavioral Analysis"]
+  },
+  "OAuth 2.0": {
+    full:"Open Authorization 2.0", icon:"🔑",
+    description:"OAuth 2.0 is an authorization framework that enables third-party applications to obtain limited access to user accounts without exposing credentials. It uses access tokens instead of passwords for API authorization.",
+    howItWorks:["Client application requests authorization from user","User approves permission grant at authorization server","Authorization server issues authorization code","Client exchanges code for access token (and refresh token)","Client uses access token to access protected resources"],
+    protects:["Credential exposure to third parties","Session hijacking (short-lived tokens)","Overprivileged access (scope limitation)"],
+    vendors:["Google","GitHub","Microsoft (MSAL)","Auth0","Okta"],
+    limitations:"Access tokens must be kept secret. Misconfigured redirect URIs allow token theft.",
+    tags:["Layer 7","Authorization","Token-Based","REST APIs"]
+  },
+  "JWT": {
+    full:"JSON Web Token", icon:"🎫",
+    description:"JWT is a compact, self-contained token format for securely transmitting claims between parties. Used in authentication and authorization. Consists of Header.Payload.Signature — all base64url-encoded.",
+    howItWorks:["Server creates JWT: {header}.{payload}.{signature}","Header: algorithm (RS256/HS256). Payload: user claims + expiry","Signature verifies token wasn't tampered with","Client stores JWT (localStorage or httpOnly cookie)","Client sends JWT in Authorization: Bearer header on each request","Server validates signature + expiry — no session database needed"],
+    protects:["Session forgery","Stateless authentication across microservices","Cross-origin API access"],
+    vendors:["Auth0","Okta","All web frameworks (Django, Rails, Express, Laravel)"],
+    limitations:"Cannot be revoked before expiry. Sensitive data in payload is base64-encoded, NOT encrypted — visible to anyone who decodes it.",
+    tags:["Layer 7","Stateless Auth","Claims-Based","Base64 Encoded"]
+  },
+  "TLS/SSL": {
+    full:"Transport Layer Security", icon:"🔒",
+    description:"TLS provides cryptographic security for network communication. It ensures confidentiality (encryption), integrity (MAC), and authentication (certificates). TLS 1.3 is the current standard. SSL is deprecated.",
+    howItWorks:["Client Hello: supported TLS versions and cipher suites","Server Hello: chosen cipher + sends X.509 certificate","Client verifies certificate against trusted CA store","ECDHE key exchange derives shared session keys (forward secrecy)","All application data encrypted with AES-GCM","Each record includes MAC to detect tampering"],
+    protects:["Eavesdropping","MITM attacks","Data tampering in transit"],
+    vendors:["OpenSSL","BoringSSL (Google)","Let's Encrypt (free certs)","DigiCert"],
+    limitations:"Only secures data in transit. Does not protect stored data. Certificate misconfiguration can expose systems.",
+    tags:["Layer 6","Encryption","X.509 Certs","Forward Secrecy"]
+  },
+  "API Keys": {
+    full:"API Key Authentication", icon:"🗝️",
+    description:"API keys are unique identifiers passed with API requests to authenticate the calling application. They're simpler than OAuth but less granular — if leaked, the entire key must be rotated.",
+    howItWorks:["Developer registers app and receives unique API key","Key sent in request header (X-API-Key) or query parameter","Server validates key against its database","Rate limiting and quota enforcement applied per key","Keys can be scoped to specific APIs or operations"],
+    protects:["Unauthorized API access","Usage quota abuse","Attribution and billing"],
+    vendors:["AWS (IAM keys)","Google Cloud","Stripe","Twilio"],
+    limitations:"Keys transmitted in HTTP headers can be captured in logs. No user-level granularity. Should never be embedded in client-side code.",
+    tags:["Layer 7","Static Credential","Rate Limiting","Developer Auth"]
+  },
+  "CAPTCHA": {
+    full:"Completely Automated Public Turing test to tell Computers and Humans Apart", icon:"🤖",
+    description:"CAPTCHA challenges distinguish human users from automated bots. Used to prevent spam, credential stuffing, and account abuse. Modern versions (v3) use behavioral scoring instead of visible puzzles.",
+    howItWorks:["User performs challenge (image recognition, checkbox, etc.)","reCAPTCHA v3 silently scores user behavior (mouse movement, timing)","Score sent to server for verification","Low-score requests blocked or challenged","Enterprise CAPTCHA bypasses can use audio alternatives"],
+    protects:["Account creation spam","Credential stuffing attacks","Scraping and automated abuse","Ticket scalping bots"],
+    vendors:["Google reCAPTCHA v3","hCaptcha","Cloudflare Turnstile","AWS WAF CAPTCHA"],
+    limitations:"Can be bypassed by CAPTCHA-solving services (farms of humans). Audio CAPTCHAs accessible to visually impaired but also to bots.",
+    tags:["Layer 7","Bot Detection","Behavioral Analysis","Turing Test"]
+  },
+  "AES-256": {
+    full:"Advanced Encryption Standard — 256-bit", icon:"🔐",
+    description:"AES-256 is a symmetric block cipher using a 256-bit key — the standard for encrypting sensitive data. Used in TLS, disk encryption, VPNs, and file encryption. NSA-approved for TOP SECRET data.",
+    howItWorks:["Block cipher: encrypts 128-bit blocks with 256-bit key","14 rounds of SubBytes, ShiftRows, MixColumns, AddRoundKey","GCM mode provides authenticated encryption (confidentiality + integrity)","Same key for encryption and decryption (symmetric)","Key exchange problem solved by asymmetric crypto (RSA/ECDH)"],
+    protects:["Data confidentiality at rest and in transit","Brute-force attacks (2^256 key space)"],
+    vendors:["OpenSSL","Windows BitLocker","Apple FileVault","VeraCrypt"],
+    limitations:"Key management is critical — a compromised key breaks all encryption. Computationally intensive without hardware acceleration (AES-NI).",
+    tags:["Layer 6","Symmetric","Block Cipher","NIST Standard"]
+  },
+  "RSA": {
+    full:"Rivest–Shamir–Adleman Public Key Cryptography", icon:"🔏",
+    description:"RSA is an asymmetric cryptographic algorithm based on the difficulty of factoring large integers. Used for key exchange and digital signatures. RSA-2048 and RSA-4096 are current standards.",
+    howItWorks:["Key pair generated: public key (n,e) and private key (n,d)","Anyone can encrypt with public key","Only private key holder can decrypt","Digital signatures: sign with private key, verify with public key","Used in TLS handshake for key exchange and certificate signing"],
+    protects:["Secure key exchange over untrusted networks","Identity authentication via digital signatures","Certificate-based trust chains"],
+    vendors:["OpenSSL","BoringSSL (Google)"],
+    limitations:"Slower than symmetric encryption — used only for key exchange, not bulk data. Vulnerable to quantum computers (Shor's algorithm). RSA-1024 is broken.",
+    tags:["Layer 6","Asymmetric","Public Key","Digital Signatures"]
+  },
+  "X.509 Certificates": {
+    full:"X.509 Public Key Infrastructure Certificate", icon:"📜",
+    description:"X.509 is the standard format for public key certificates used in TLS/SSL. A certificate binds a public key to an identity, signed by a trusted Certificate Authority (CA). Your browser trusts ~150 root CAs.",
+    howItWorks:["Entity generates key pair, submits CSR (Certificate Signing Request) to CA","CA verifies identity (DV=domain, OV=organization, EV=extended validation)","CA signs certificate with its private key","Browser/client checks certificate signature against trusted CA store","Certificate includes: subject, public key, validity period, SAN fields","Revocation checked via CRL or OCSP"],
+    protects:["Identity spoofing (impersonation)","MITM attacks on HTTPS","Trust chain verification"],
+    vendors:["Let's Encrypt (free certs)","DigiCert","Sectigo","GlobalSign","Comodo"],
+    limitations:"CA compromise breaks trust for all issued certificates. Certificate pinning can mitigate rogue CAs. Must be renewed before expiry.",
+    tags:["Layer 6","PKI","Trust Chain","CA-Signed"]
+  },
+  "SYN Cookies": {
+    full:"SYN Cookie Defense Mechanism", icon:"🍪",
+    description:"SYN Cookies eliminate server-side state for half-open TCP connections by encoding connection parameters into the TCP ISN (Initial Sequence Number). This defeats SYN Flood attacks without requiring memory allocation.",
+    howItWorks:["Instead of allocating TCB, server encodes timestamp+MSS+hash into SYN-ACK's ISN","No memory used for the half-open connection","Legitimate client ACKs with ISN+1 — server verifies the encoded data","If valid ACK arrives, TCB is created and connection established","Spoofed SYNs never produce valid ACKs — no resources wasted"],
+    protects:["SYN Flood","TCP state exhaustion","Half-open connection table overflow"],
+    vendors:["Linux kernel (enabled automatically)","FreeBSD","Windows Server","Cisco IOS"],
+    limitations:"Some TCP options (SACK, window scaling) cannot be stored in the cookie — may reduce performance for legitimate connections during attack.",
+    tags:["Layer 4","TCP Defense","Stateless","Anti-DoS"]
+  },
+  "Rate Limiting": {
+    full:"Traffic Rate Limiting", icon:"⏱️",
+    description:"Rate limiting restricts the number of requests a client can make within a time window. Applied at Layer 4 (SYN rate) or Layer 7 (HTTP requests). Prevents DoS, brute force, and API abuse.",
+    howItWorks:["Track request count per client IP/token within sliding time window","Allow up to N requests per window (e.g., 100 req/min)","Return HTTP 429 Too Many Requests when limit exceeded","Token bucket or leaky bucket algorithms smooth burst traffic","Distributed rate limiting requires shared state (Redis)"],
+    protects:["Brute force login attacks","DDoS amplification","API abuse and scraping","Credential stuffing","UDP Flood"],
+    vendors:["NGINX (limit_req)","Cloudflare WAF","AWS API Gateway","Kong","Redis (INCR+EXPIRE)"],
+    limitations:"IP-based rate limiting ineffective against distributed attacks. Legitimate users behind shared NAT may be wrongly limited.",
+    tags:["Layer 4/7","Threshold Control","429 Response","Token Bucket"]
+  },
+  "Port Filtering": {
+    full:"Firewall Port Filtering", icon:"🚪",
+    description:"Port filtering controls which TCP/UDP ports are accessible from external networks. A fundamental firewall technique — only allow explicitly needed ports, deny everything else (default-deny posture).",
+    howItWorks:["Firewall rules match on src/dst IP, protocol, port","Allow rules: only open ports needed (443, 80, 22 for admin)","Implicit deny: all unmatched traffic blocked","Stateful filtering tracks connection state — allows return traffic","Egress filtering also blocks outbound connections to malicious ports"],
+    protects:["Unauthorized service access","Port scanning","Vulnerability scanning exploitation","Lateral movement via unusual ports"],
+    vendors:["iptables/nftables (Linux)","Windows Firewall","Cisco ACL","pf (FreeBSD)","pfSense"],
+    limitations:"Cannot stop attacks on allowed ports. Application-layer attacks bypass port filtering since they use allowed ports (80/443).",
+    tags:["Layer 4","ACL","Default-Deny","Stateful"]
+  },
+  "Deep Packet Inspection": {
+    full:"Deep Packet Inspection (DPI)", icon:"🔬",
+    description:"DPI examines the full content of packets beyond just headers — analyzing Layer 7 application data. Used for intrusion detection, content filtering, QoS, and malware detection. Also used for censorship by nation-states.",
+    howItWorks:["Packet captured at wire speed using specialized hardware/FPGA","Layer 3/4 headers parsed first for routing/firewall decisions","Payload reassembled into application-layer streams","Pattern matching against threat signatures","Behavioral analysis detects anomalies (e.g., DNS tunneling)","Results used for allow/block/shape/log decisions"],
+    protects:["Protocol-based attacks on allowed ports","Encrypted malware C2 communication (with SSL inspection)","Data exfiltration via allowed protocols"],
+    vendors:["Palo Alto NGFW","Snort/Suricata (open source IDS/IPS)","Zeek (Bro)","Cisco Firepower"],
+    limitations:"Cannot inspect encrypted traffic without SSL/TLS interception. High computational cost. Privacy implications for user traffic.",
+    tags:["Layer 4-7","Content Inspection","IDS/IPS","Signature Matching"]
+  },
+  "IPSec": {
+    full:"Internet Protocol Security Suite", icon:"🔐",
+    description:"IPSec secures IP communications at the network layer using AH (Authentication Header) and ESP (Encapsulating Security Payload). The backbone of VPN tunnels.",
+    howItWorks:["IKE Phase 1: authenticate peers, establish secure channel","IKE Phase 2: negotiate IPSec SA (Security Association)","ESP encrypts+authenticates packet payload","AH authenticates entire packet but no encryption","Tunnel mode wraps entire original packet in new IP header"],
+    protects:["IP spoofing","Packet interception and modification","Replay attacks (sequence numbers)"],
+    vendors:["Cisco IOS IPSec","strongSwan (Linux)","Windows L2TP/IPSec","Palo Alto GlobalProtect"],
+    limitations:"Complex to configure. IKEv1 has known weaknesses. Aggressive mode vulnerable to offline dictionary attacks.",
+    tags:["Layer 3","VPN","Encryption","Authentication"]
+  },
+  "ACLs": {
+    full:"Access Control Lists", icon:"📋",
+    description:"ACLs are ordered lists of permit/deny rules applied to network interfaces. They filter traffic based on src/dst IP, protocol, and port. Standard ACLs filter by source IP only; Extended ACLs add destination, port, and protocol.",
+    howItWorks:["Rules processed top-to-bottom, first match wins","Standard ACL: match source IP only","Extended ACL: match src+dst IP, protocol, port, flags","Applied inbound (filter before routing) or outbound (after routing)","Implicit deny-all at end of every ACL list"],
+    protects:["Unauthorized network access","Traffic from known-bad IP ranges","Protocol-based access control"],
+    vendors:["Cisco IOS","Juniper JunOS","pfSense","iptables/nftables (Linux)"],
+    limitations:"Cannot inspect application layer content. Does not track connection state (unlike stateful firewalls). Long ACLs have performance impact.",
+    tags:["Layer 3","Packet Filtering","Permit/Deny","Interface-Based"]
+  },
+  "DNSSEC": {
+    full:"DNS Security Extensions", icon:"🛡️",
+    description:"DNSSEC adds cryptographic signatures to DNS records, allowing resolvers to verify that DNS responses are authentic and haven't been tampered with. Defeats DNS cache poisoning and spoofing.",
+    howItWorks:["Zone signed with private key — each record gets RRSIG (Resource Record Signature)","Public key published as DNSKEY record","Chain of trust from root zone → TLD → authoritative nameserver","Resolver validates signature of each DNS response","NSEC/NSEC3 provides authenticated denial of non-existent domains"],
+    protects:["DNS Cache Poisoning","DNS Spoofing","BGP Hijacking"],
+    vendors:["Cloudflare (1.1.1.1 validates DNSSEC)","Google DNS (8.8.8.8)","PowerDNS","BIND 9"],
+    limitations:"Only ~30% of domains signed. Does not encrypt DNS (use DoH/DoT for privacy). Complex key rollover process. NSEC zone enumeration issue.",
+    tags:["Layer 7","DNS Signing","Chain of Trust","RFC 4033-4035"]
+  },
+  "RPKI": {
+    full:"Resource Public Key Infrastructure", icon:"🌐",
+    description:"RPKI is a cryptographic framework that lets network operators create Route Origin Authorizations (ROAs) — cryptographically signed statements about which AS is authorized to originate specific IP prefixes. Defends against BGP hijacking.",
+    howItWorks:["IP holder creates ROA: 'AS12345 is authorized to originate 203.0.113.0/24'","ROA signed and published in RPKI repository","ISP routers validate BGP announcements against RPKI","Invalid routes (wrong AS or more-specific prefix) dropped or flagged","Route Origin Validation states: Valid, Invalid, NotFound"],
+    protects:["BGP Hijacking","Prefix origin spoofing","Accidental BGP misconfiguration leaks"],
+    vendors:["Cloudflare (RPKI deployment)","NTT","Telia","RIPE NCC (repository)","Routinator (validator)"],
+    limitations:"Only validates route origin, not the AS-PATH. Does not prevent path manipulation attacks. Requires broad industry adoption to be fully effective.",
+    tags:["Layer 3","BGP Security","Route Origin Auth","PKI-Based"]
+  },
+  "VLAN Segmentation": {
+    full:"Virtual LAN Network Segmentation", icon:"🔀",
+    description:"VLANs partition a physical network into multiple isolated logical networks at Layer 2. Traffic between VLANs must pass through a router (inter-VLAN routing), allowing firewall policies to be enforced.",
+    howItWorks:["Switch ports assigned to VLANs (access ports carry one VLAN)","Trunk ports carry multiple VLANs with 802.1Q tagging","Traffic within a VLAN broadcasts freely; cross-VLAN requires routing","Router-on-a-stick or Layer-3 switch does inter-VLAN routing","Firewall policies enforced at Layer-3 VLAN interface"],
+    protects:["Lateral movement between network segments","Broadcast domain containment","Guest/IoT network isolation","PCI-DSS compliance (isolate cardholder data)"],
+    vendors:["Cisco (VLANs 1-4094)","Arista","Juniper","HPE Aruba","Palo Alto (security zones)"],
+    limitations:"VLAN hopping attacks (double-tagging, DTP) can bypass VLAN isolation. Native VLAN mismatches create vulnerabilities. Proper switch hardening required.",
+    tags:["Layer 2","Network Isolation","802.1Q","Broadcast Domains"]
+  },
+  "Port Security": {
+    full:"Switch Port Security", icon:"🔌",
+    description:"Port Security limits which MAC addresses can communicate through a switch port. It prevents unauthorized devices from connecting and defends against MAC flooding attacks by limiting CAM table entries per port.",
+    howItWorks:["Configure max allowed MACs per port (typically 1-3)","MACs learned dynamically (sticky) or configured statically","If violation occurs (new MAC beyond limit): restrict/shutdown/protect","Restrict: drops packets from unknown MACs, increments counter","Shutdown: error-disables the port (requires admin re-enable)","Protect: silently drops packets from unknown MACs"],
+    protects:["MAC Flooding","Unauthorized device connection","Rogue hub/switch connections"],
+    vendors:["Cisco Catalyst","Aruba ProCurve","Dell EMC networking"],
+    limitations:"Only protects against MAC-based attacks. Doesn't prevent IP spoofing. Requires per-port configuration — operationally intensive in large environments.",
+    tags:["Layer 2","CAM Table","MAC Limiting","Anti-Flooding"]
+  },
+  "802.1X": {
+    full:"IEEE 802.1X Port-Based Network Access Control", icon:"🎯",
+    description:"802.1X provides port-based authentication before granting network access. Uses EAP (Extensible Authentication Protocol) over a RADIUS server. Used in both wired and wireless enterprise networks.",
+    howItWorks:["Supplicant (client) connects to switch/AP port","Port placed in 'unauthorized' state — only EAP traffic allowed","Authenticator (switch/AP) forwards EAP to RADIUS server","RADIUS authenticates user (certificate, password, MFA)","RADIUS sends Accept + optional VLAN assignment","Port moved to 'authorized' state — full network access granted"],
+    protects:["Unauthorized device network access","Rogue device connection","Unauthorized VLAN access","Evil Twin Attack"],
+    vendors:["Cisco ISE","Microsoft NPS","FreeRADIUS","Aruba ClearPass","Juniper Steel-Belted"],
+    limitations:"Complex to deploy. Devices without 802.1X supplicant (printers, IoT) need MAB (MAC Auth Bypass). Certificate management overhead.",
+    tags:["Layer 2","RADIUS","EAP","NAC"]
+  },
+  "BPDU Guard": {
+    full:"Bridge Protocol Data Unit Guard", icon:"🌲",
+    description:"BPDU Guard is a Spanning Tree Protocol (STP) security feature that shuts down a switch port if it receives a BPDU frame. This prevents rogue switches from manipulating STP topology and claiming root bridge status.",
+    howItWorks:["Enabled on access ports that should never receive BPDUs (end devices only)","BPDU received on guarded port triggers immediate err-disable","Port must be manually re-enabled (or auto-recovery after timeout)","Prevents attacker from sending crafted BPDUs to become root bridge","Root Guard is complementary — keeps current root bridge role"],
+    protects:["STP Root Bridge Attack","Network topology manipulation","Traffic redirection via STP manipulation","Rogue switch insertion"],
+    vendors:["Cisco (PortFast BPDU Guard)","Arista","Juniper (edge ports)","HPE"],
+    limitations:"Only protects specific ports. Must be configured on all edge/access ports. Does not protect against insider attacks on trunk ports.",
+    tags:["Layer 2","STP Security","Root Bridge Protection","Port Shutdown"]
+  },
+  "MAC Filtering": {
+    full:"MAC Address Filtering", icon:"🏷️",
+    description:"MAC filtering restricts network access to devices with pre-approved MAC addresses. A basic access control mechanism often used on wireless networks, though easily defeated by MAC spoofing.",
+    howItWorks:["Administrator builds allowlist of approved MAC addresses","Switch or WAP checks source MAC of each frame against list","Unknown MACs dropped or blocked from network access","On Wi-Fi: association rejected if MAC not in allowlist","Dynamic MAC filtering can react to behavioral anomalies"],
+    protects:["Casual unauthorized network access","Drive-by connection to open networks"],
+    vendors:["All managed switches and wireless APs","Home routers"],
+    limitations:"MAC addresses can be trivially spoofed with a single command. Provides only weak security. Management overhead in large environments. Should not be relied upon as sole access control.",
+    tags:["Layer 2","Allowlist","Weak Control","Easily Bypassed"]
+  },
+  "Physical Access Control": {
+    full:"Physical Security and Access Control", icon:"🏢",
+    description:"Physical access controls prevent unauthorized individuals from reaching network equipment, cables, and hardware. The most fundamental security layer — if an attacker has physical access, most software controls can be bypassed.",
+    howItWorks:["Multi-factor entry: badge + PIN + biometric for data center access","Security cameras with motion detection and retention","Man-traps (two-door airlock systems) prevent tailgating","Asset tracking: all hardware inventoried, tagged, and monitored","Sealed cable conduits prevent tapping without detection","Destruction protocols for decommissioned storage media"],
+    protects:["Cable tapping and hardware implants","Device theft","Unauthorized console access","USB rubber ducky / BadUSB attacks"],
+    vendors:["HID Global (access cards)","Lenel","Software House","Verkada (cameras)","Iron Mountain (secure disposal)"],
+    limitations:"Insider threats with legitimate physical access bypass all controls. Social engineering (tailgating) can defeat procedural controls. Remote management consoles (iDRAC, iLO) need separate protection.",
+    tags:["Layer 1","Physical Security","Perimeter","Defense in Depth"]
+  },
+  "Kerberos": {
+    full:"Kerberos Network Authentication Protocol", icon:"🐕",
+    description:"Kerberos is a ticket-based authentication protocol used in Active Directory environments. It enables single sign-on (SSO) by issuing encrypted tickets instead of transmitting passwords across the network.",
+    howItWorks:["Client requests Authentication Service (AS) ticket with username","KDC (Key Distribution Center) verifies identity, issues TGT (Ticket Granting Ticket)","Client uses TGT to request Service Ticket from Ticket Granting Service (TGS)","Service Ticket presented to target service — no password sent over network","Tickets have time-limited validity (default 10 hours)","Mutual authentication: client AND server verify each other"],
+    protects:["Password interception on network","Replay attacks (timestamps)","Password-based attacks against services"],
+    vendors:["Microsoft Active Directory","MIT Kerberos","Heimdal Kerberos","Apple macOS/iOS"],
+    limitations:"Kerberoasting extracts service account hashes for offline cracking. Pass-the-Ticket allows credential reuse. Requires synchronized clocks. Golden/Silver Ticket attacks if KDC compromised.",
+    tags:["Layer 5","Ticket-Based","Active Directory","SSO"]
+  },
+  "RADIUS": {
+    full:"Remote Authentication Dial-In User Service", icon:"📡",
+    description:"RADIUS is a networking protocol providing centralized authentication, authorization, and accounting (AAA) for users connecting to network services. Core to 802.1X NAC and VPN authentication.",
+    howItWorks:["NAS (switch/VPN) receives credentials, forwards to RADIUS server","RADIUS server validates credentials against directory (LDAP/AD)","Access-Accept: user allowed + optional attributes (VLAN, ACL, timeout)","Access-Reject: user denied","Access-Challenge: MFA second factor required","Accounting records track session start/stop/bandwidth"],
+    protects:["Unauthorized network access","Centralized policy enforcement","Audit trail of all access events"],
+    vendors:["FreeRADIUS","Cisco ISE","Microsoft NPS","Aruba ClearPass","Okta RADIUS Agent"],
+    limitations:"UDP-based — some packet loss risk. RADIUS secret must be protected. RADIUS proxying adds complexity and attack surface.",
+    tags:["Layer 5","AAA","Centralized Auth","NAS Protocol"]
+  },
+  "Session Tokens": {
+    full:"Session Token Authentication", icon:"🎟️",
+    description:"Session tokens are random, cryptographically generated values that represent an authenticated session. Stored server-side (session ID) or client-side (JWT). Used to maintain stateful web application sessions.",
+    howItWorks:["User authenticates with credentials","Server generates cryptographically random session token (128+ bits)","Token stored in httpOnly cookie (XSS protection) or localStorage","Each subsequent request includes token","Server validates token against session store","Token invalidated on logout or expiry"],
+    protects:["Re-authentication on every request","Session brute force (long random tokens)","Cross-origin session theft (httpOnly cookies)"],
+    vendors:["All web frameworks (Django, Rails, Express, Laravel)"],
+    limitations:"Session fixation if token not rotated after login. XSS can steal tokens from non-httpOnly cookies. CSRF can abuse cookie-based tokens.",
+    tags:["Layer 5-7","Stateful Session","Cookie-Based","Web Auth"]
+  },
+  "CHAP": {
+    full:"Challenge Handshake Authentication Protocol", icon:"🤝",
+    description:"CHAP authenticates users using a challenge-response mechanism — passwords are never transmitted. The authenticator sends a random challenge; the client responds with a hash of the challenge + password.",
+    howItWorks:["Authenticator sends random challenge value to client","Client computes: MD5(ID + secret + challenge)","Authenticator performs same computation independently","Responses compared — match means authentication succeeds","Re-challenge can occur periodically during session to prevent replay"],
+    protects:["Password interception (never sent over network)","Simple replay attacks (challenge changes each time)"],
+    vendors:["PPP connections","L2TP/IPSec","Some RADIUS implementations"],
+    limitations:"MD5-based CHAP is weak (MD5 broken). MS-CHAPv2 has known vulnerabilities. Superseded by EAP-TLS in modern environments.",
+    tags:["Layer 5","Challenge-Response","PPP","Hash-Based"]
+  },
+  "Firewalls": {
+    full:"Network Firewall", icon:"🛡️",
+    description:"Firewalls are the primary network security control, inspecting and filtering traffic based on rules. Modern NGFWs operate from Layer 3 (IP filtering) through Layer 7 (application identification), combining multiple security functions.",
+    howItWorks:["Stateful inspection: tracks TCP/UDP connection state","Layer 3/4: IP address and port-based filtering","Layer 7: application identification (regardless of port)","URL filtering: block categories of websites","IPS integration: detect and block exploits inline","SSL/TLS inspection: decrypt, inspect, re-encrypt HTTPS"],
+    protects:["External network attacks","Unauthorized outbound connections","Protocol abuse","Known exploit patterns"],
+    vendors:["Palo Alto NGFW","Fortinet FortiGate","Check Point","Cisco Firepower","pfSense"],
+    limitations:"Cannot prevent insider threats with legitimate access. SSL inspection creates privacy concerns and certificate trust issues. Zero-day attacks bypass signature-based detection.",
+    tags:["Layer 3-7","Stateful","NGFW","Perimeter Security"]
+  },
+  "Route Authentication": {
+    full:"BGP/Routing Protocol Authentication", icon:"🔑",
+    description:"Routing protocol authentication uses MD5 or SHA-based HMACs to verify that routing protocol messages (BGP, OSPF, EIGRP) come from legitimate peers. Prevents injection of fake routing information.",
+    howItWorks:["Configure shared secret on both BGP/OSPF peers","Each routing update includes HMAC of message+secret","Receiver recomputes HMAC and compares","Non-matching or missing HMAC = update dropped","BGP TCP MD5: protects against TCP session spoofing","OSPF uses per-packet HMAC-SHA authentication"],
+    protects:["Rogue router injection","OSPF/BGP route manipulation","Unauthorized neighbor establishment","BGP Hijacking"],
+    vendors:["Cisco IOS (key chains)","Juniper JunOS","Quagga/FRRouting"],
+    limitations:"MD5-based authentication is weak — SHA-256 preferred. Key management and rotation is operationally complex. Does not prevent attacks by legitimate peers.",
+    tags:["Layer 3","HMAC","Routing Security","Peer Verification"]
+  }
+};
+
+// ═══ PROTOCOL DB ═══
+const PROTOCOL_DB = {
+  "HTTP/HTTPS": { full:"HyperText Transfer Protocol (Secure)", layer:7, category:"Web Communication", port:"80 (HTTP), 443 (HTTPS)", description:"HTTP is the foundation of data communication on the World Wide Web. It is a request-response protocol between clients (browsers) and servers. HTTPS adds TLS/SSL encryption for secure communication.", howItWorks:["Client sends an HTTP request (GET, POST, PUT, DELETE) to a server","Server processes the request and returns an HTTP response with status code","HTTPS wraps this in TLS — a handshake establishes encryption keys first","Data is encrypted end-to-end, preventing eavesdropping","Modern HTTP/2 and HTTP/3 (QUIC) improve performance with multiplexing"], usedBy:["Web browsers","REST APIs","Web scraping tools","CDN networks"], attacks:["HTTP Request Smuggling","HTTPS Downgrade Attack","SSL Stripping","HTTP Flood DDoS"], hackers:["Script Kiddie","APT Group","Cybercriminal","Hacktivist"] },
+  "DNS": { full:"Domain Name System", layer:7, category:"Name Resolution", port:"53 (UDP/TCP)", description:"DNS translates human-readable domain names (google.com) into machine-readable IP addresses (142.250.80.46). It operates as a distributed, hierarchical database across the internet.", howItWorks:["User types domain name → browser checks local DNS cache","If not cached, queries Recursive Resolver (your ISP or 8.8.8.8)","Resolver queries Root Nameservers → TLD servers (.com) → Authoritative server","Authoritative server returns the IP address record (A or AAAA record)","Result cached for TTL duration, IP returned to browser"], usedBy:["Every internet-connected device","Mail servers (MX records)","CDNs (CNAME)"], attacks:["DNS Spoofing","DNS Amplification DDoS","DNS Tunneling","NXDOMAIN Attack"], hackers:["APT Group","Cybercriminal"] },
+  "FTP": { full:"File Transfer Protocol", layer:7, category:"File Transfer", port:"20 (data), 21 (control)", description:"FTP is a standard protocol for transferring files between a client and server. It uses two separate channels: command and data. FTP transmits credentials in plaintext — insecure by design.", howItWorks:["Client connects to port 21 — establishes control connection","User authenticates with username/password (sent in cleartext!)","Client issues commands (LIST, RETR, STOR) over control channel","Server opens a separate data connection (port 20 in active mode)","File data is transferred over the data connection"], usedBy:["Web developers uploading sites","System administrators","Legacy enterprise systems"], attacks:["FTP Bounce Attack","Credential Sniffing","Anonymous FTP Abuse","Brute Force Login"], hackers:["Internal network attackers","Password crackers","Opportunistic bots"] },
+  "SMTP": { full:"Simple Mail Transfer Protocol", layer:7, category:"Email", port:"25, 465 (SSL), 587 (TLS)", description:"SMTP is the protocol used to send email messages between servers and from clients to servers. POP3/IMAP retrieve mail. SMTP handles outgoing delivery.", howItWorks:["Email client connects to SMTP server on port 587","EHLO/HELO command initiates conversation","MAIL FROM and RCPT TO specify sender and recipient","DATA command sends message headers + body","Server relays message to recipient's SMTP server using MX DNS records"], usedBy:["Email clients","Mail servers","Marketing platforms","Alert systems"], attacks:["Email Spoofing","SMTP Open Relay Abuse","Phishing","Email Bombing"], hackers:["Phishers","Spammers","Social engineers","BEC actors"] },
+  "SSH": { full:"Secure Shell", layer:7, category:"Remote Access", port:"22", description:"SSH provides a secure, encrypted channel for remote login, command execution, and file transfer (via SCP/SFTP). It replaced insecure Telnet. Uses asymmetric cryptography for authentication.", howItWorks:["Client initiates TCP connection to port 22","SSH version and algorithm negotiation occurs","Diffie-Hellman key exchange establishes shared session key","Server authenticates (host key verification — prevents MITM)","Client authenticates via password or public key cryptography","Encrypted tunnel established for all subsequent communication"], usedBy:["System administrators","DevOps engineers","Network engineers"], attacks:["SSH Brute Force","Key Theft","Man-in-the-Middle (on first connection)","SSH Tunneling Abuse"], hackers:["Penetration testers","APT groups","Credential stuffers"] },
+  "TCP": { full:"Transmission Control Protocol", layer:4, category:"Transport Protocol", port:"Various (defined by application)", description:"TCP is a connection-oriented, reliable transport protocol. It guarantees delivery, ordering, and error checking. Uses a 3-way handshake to establish connections and manages flow/congestion control.", howItWorks:["3-Way Handshake: SYN → SYN-ACK → ACK to establish connection","Data segmented and given sequence numbers for ordering","Sliding window protocol controls flow rate","Acknowledgments (ACKs) confirm receipt; lost segments retransmitted","Connection terminated with FIN → FIN-ACK → ACK (4-way teardown)"], usedBy:["HTTP/HTTPS","SSH","FTP","SMTP","Any reliability-critical application"], attacks:["SYN Flood","TCP Session Hijacking","RST Injection","TCP Sequence Number Prediction","Port Scanning"], hackers:["Network-layer attackers","DDoS operators","Session hijackers"] },
+  "UDP": { full:"User Datagram Protocol", layer:4, category:"Transport Protocol", port:"Various (DNS:53, DHCP:67/68, VoIP)", description:"UDP is a connectionless, lightweight transport protocol. No guarantees of delivery, ordering, or error recovery — faster than TCP for applications that tolerate some loss.", howItWorks:["No handshake — sender simply transmits datagrams","Each datagram independently routed, may arrive out of order or not at all","No acknowledgments — fire and forget","Checksum provides basic error detection (not correction)","Application layer handles any needed reliability (QUIC, RTP)"], usedBy:["DNS","Video streaming (RTP)","Online gaming","VoIP","DHCP"], attacks:["UDP Flood","DNS Amplification DDoS","SSDP Reflection","Fraggle Attack"], hackers:["DDoS-for-hire operators","Botnet herders","Amplification attackers"] },
+  "IPv4": { full:"Internet Protocol version 4", layer:3, category:"Network Protocol", port:"N/A (Network Layer)", description:"IPv4 is the primary protocol for routing packets across interconnected networks. Provides 32-bit logical addressing, packet fragmentation, and TTL-based loop prevention.", howItWorks:["Sender wraps data in IP packet with src/dst IP addresses","Router receives packet, examines destination IP","Routing table lookup determines next hop","TTL field decremented at each hop; packet dropped at TTL=0","Packet may be fragmented at MTU boundaries and reassembled at destination"], usedBy:["All internet communication","LANs","WANs"], attacks:["IP Spoofing","IP Fragmentation Attack","Smurf Attack","Land Attack"], hackers:["Network-level attackers","DDoS operators","Firewall evaders"] },
+  "IPv6": { full:"Internet Protocol version 6", layer:3, category:"Network Protocol", port:"N/A (Network Layer)", description:"IPv6 is the successor to IPv4, using 128-bit addresses. Solves IPv4 address exhaustion, built-in IPSec, no NAT needed, and improved routing efficiency.", howItWorks:["128-bit hex addresses allow 3.4×10³⁸ unique addresses","No broadcast — uses multicast and anycast instead","SLAAC allows auto-configuration without DHCP","Extension headers replace IPv4 options field for flexibility","ICMPv6 handles neighbor discovery (replaces ARP)"], usedBy:["Modern internet infrastructure","Mobile networks (5G)","IoT devices"], attacks:["IPv6 Header Manipulation","Rogue Router Advertisement","NDP Spoofing","Tunneling bypasses"], hackers:["Advanced network attackers","Firewall bypass specialists"] },
+  "ARP": { full:"Address Resolution Protocol", layer:2, category:"Address Resolution", port:"N/A (Data Link Layer)", description:"ARP resolves IP addresses to MAC addresses within a local network segment. Broadcasts to find the MAC address corresponding to an IP address.", howItWorks:["Device A wants to reach 192.168.1.10 — checks ARP cache","If not cached, broadcasts ARP Request: 'Who has 192.168.1.10?'","Device with that IP unicasts ARP Reply with its MAC address","Device A caches the IP→MAC mapping and sends the frame","ARP cache entries expire after a timeout (typically 20 min)"], usedBy:["All devices on a LAN","Routers for next-hop resolution","Switches (implicitly)"], attacks:["ARP Spoofing","ARP Cache Poisoning MITM","Gratuitous ARP Abuse"], hackers:["LAN-based attackers","Penetration testers (internal)","Insider threats"] },
+  "Ethernet": { full:"Ethernet (IEEE 802.3)", layer:2, category:"Data Link Protocol", port:"N/A (Data Link Layer)", description:"Ethernet is the dominant wired LAN technology. Defines frame format, MAC addressing, and media access control. Modern Ethernet uses switched full-duplex.", howItWorks:["Data encapsulated in Ethernet frame: preamble, src/dst MAC, EtherType, data, FCS","Frame transmitted as electrical signals on copper or light on fiber","Receiving NIC checks destination MAC — accepts if matches or is broadcast","FCS (CRC-32) checked for errors — frame discarded if corrupted","Switches use MAC address table to forward frames only to correct port"], usedBy:["Wired LANs","Data centers","Industrial networks"], attacks:["MAC Flooding","VLAN Hopping","Frame Spoofing","Ethernet Jamming"], hackers:["Physical access attackers","Insider threats","Rogue device planters"] },
+  "Wi-Fi (802.11)": { full:"IEEE 802.11 Wireless LAN", layer:2, category:"Wireless Protocol", port:"N/A (Data Link/Physical)", description:"Wi-Fi defines wireless LAN communication. Uses CSMA/CA to avoid collisions. Multiple versions: 802.11a/b/g/n/ac/ax (Wi-Fi 6).", howItWorks:["Access Point (AP) broadcasts beacon frames with SSID","Client scans for APs, selects one, sends authentication request","4-way handshake establishes encryption keys (WPA2/WPA3)","Data frames transmitted using OFDM/OFDMA modulation","CSMA/CA: device waits for channel idle + random backoff before transmitting"], usedBy:["Home/office networks","Mobile devices","IoT devices"], attacks:["Evil Twin Attack","WPA2 KRACK","Deauthentication Attack","PMKID Attack","WPS Brute Force"], hackers:["Wardriver","Wi-Fi crackers","Rogue AP operators"] },
+  "TLS/SSL": { full:"Transport Layer Security / Secure Sockets Layer", layer:6, category:"Security Protocol", port:"443 (HTTPS), 465 (SMTPS), 993 (IMAPS)", description:"TLS provides cryptographic security. Ensures confidentiality, integrity, and authentication. TLS 1.3 is current standard; SSL and TLS 1.0/1.1 are deprecated.", howItWorks:["TLS Handshake: Client Hello (supported cipher suites, TLS version)","Server Hello: chooses cipher, sends certificate (X.509)","Client verifies certificate against trusted CA store","Key exchange (ECDHE in TLS 1.3) derives shared session keys","Application data encrypted with symmetric cipher (AES-GCM)","MAC ensures integrity of each record"], usedBy:["HTTPS websites","Email (SMTPS)","VPNs","API communication"], attacks:["SSL Stripping","BEAST Attack","POODLE Attack","HEARTBLEED","Certificate Spoofing"], hackers:["MITM specialists","Certificate fraudsters","Protocol downgrade attackers"] },
+  "QUIC": { full:"Quick UDP Internet Connections", layer:4, category:"Transport Protocol", port:"443 (UDP)", description:"QUIC is a modern transport protocol developed by Google. Runs over UDP, combines TCP reliability with TLS 1.3 encryption in a single handshake.", howItWorks:["Runs over UDP — avoids TCP head-of-line blocking","0-RTT or 1-RTT connection establishment","Multiple independent streams multiplexed in one connection","Built-in TLS 1.3 encryption","Connection IDs survive IP/port changes (mobile handoff)"], usedBy:["HTTP/3","Google services","YouTube","Chrome browser"], attacks:["QUIC Flood DDoS","0-RTT Replay Attack","Traffic Analysis"], hackers:["DDoS operators","Protocol researchers","Firewall evaders"] },
+  "IPSec": { full:"Internet Protocol Security", layer:3, category:"Security Protocol", port:"ESP:50, AH:51, IKE:500,4500 (UDP)", description:"IPSec secures IP communications at the network layer. Used in VPNs, site-to-site tunnels, and host-to-host security.", howItWorks:["IKE negotiates security associations (SAs)","AH provides integrity and authentication only","ESP provides encryption + authentication","Transport mode: encrypts only payload; Tunnel mode: encrypts entire packet","SA database stores keys and algorithms"], usedBy:["VPN gateways","Site-to-site connections","Remote access VPNs"], attacks:["IKE Aggressive Mode Attacks","SA Deletion DoS","Downgrade Attacks","Key Extraction"], hackers:["VPN exploit researchers","Nation-state attackers","Insider threat actors"] },
+  "BGP": { full:"Border Gateway Protocol", layer:3, category:"Routing Protocol", port:"179 (TCP)", description:"BGP is the routing protocol of the internet — manages how packets route across autonomous systems. Every ISP, cloud provider uses BGP.", howItWorks:["BGP peers establish TCP sessions on port 179","Exchange OPEN, UPDATE, NOTIFICATION, KEEPALIVE messages","UPDATE messages advertise or withdraw network prefixes","BGP selects best path based on attributes (AS-PATH, LOCAL-PREF, MED)","Chosen routes installed in routing table and advertised to other peers"], usedBy:["ISPs","Cloud providers (AWS, Azure, GCP)","CDNs","Large enterprises"], attacks:["BGP Hijacking","BGP Route Leak","Prefix Hijacking","Sub-prefix Hijacking"], hackers:["Nation-state actors","ISP-level attackers","Sophisticated APT groups"] },
+  "OSPF": { full:"Open Shortest Path First", layer:3, category:"Routing Protocol", port:"Protocol 89 (not TCP/UDP)", description:"OSPF is a link-state routing protocol that calculates shortest paths using Dijkstra's algorithm. Most widely used interior gateway protocol.", howItWorks:["Routers exchange Hello packets to discover OSPF neighbors","Neighbor adjacencies formed based on matching parameters","Each router floods LSAs to all OSPF routers","Every router builds identical LSDB (Link State Database)","Dijkstra's SPF algorithm calculates shortest path tree from LSDB"], usedBy:["Enterprise networks","ISP core networks","Data centers"], attacks:["OSPF Route Injection","LSA Flooding DoS","Neighbor Spoofing","OSPF Max-Age Attack"], hackers:["Insider threats","Advanced network intruders","ISP-level attackers"] }
+};
+
+// ═══ DEVICE DB ═══
+const DEVICE_DB = {
+  "Router": { layer:3, icon:"🔀", description:"A router forwards packets between different networks by examining destination IP addresses. Operates at Layer 3 and maintains a routing table to determine the best path for each packet.", howItWorks:["Receives incoming packet on one interface","Examines destination IP address in packet header","Performs longest prefix match lookup in routing table","Decrements TTL field — drops packet if TTL reaches 0","Encapsulates packet in new Layer 2 frame for next hop","Forwards packet out the appropriate interface"], keyFeatures:["Routing table management","NAT (Network Address Translation)","DHCP server","Firewall capabilities","QoS traffic shaping"], attacks:["Default credential exploitation","Router firmware vulnerabilities","BGP Hijacking","OSPF Route Injection"], vendors:["Cisco","Juniper","MikroTik","Palo Alto NGFW","pfSense"] },
+  "Switch": { layer:2, icon:"🔌", description:"A switch connects devices within a LAN and forwards frames based on destination MAC addresses. Only sends data to the specific destination port, reducing collisions.", howItWorks:["Maintains a MAC address table (CAM table) mapping MAC→port","Receives frame, reads destination MAC address","Looks up destination MAC in CAM table","If found: forwards frame only to that specific port","If not found: floods frame to all ports","Broadcast frames always sent to all ports"], keyFeatures:["VLAN segmentation","STP (Spanning Tree)","Port mirroring/SPAN","QoS/CoS tagging","Link aggregation (LACP)"], attacks:["MAC Flooding","VLAN Hopping","STP Root Bridge Attack","Port Stealing","ARP Spoofing"], vendors:["Cisco Catalyst","Arista","Juniper","HPE Aruba","Dell EMC networking"] },
+  "Firewall": { layer:"3–7", icon:"🛡️", description:"A firewall monitors and controls traffic based on security rules. Modern NGFWs operate from Layer 3 (IP) to Layer 7 (application protocols).", howItWorks:["Stateful inspection tracks connection state for each flow","Packet filtering checks IP/port rules at L3/L4","Deep Packet Inspection (DPI) analyzes application content at L7","Rules processed top-to-bottom; first match wins","NAT translates private→public IPs for outbound traffic","Logs all allow/deny decisions for audit trails"], keyFeatures:["Stateful inspection","Application awareness","IPS/IDS integration","SSL inspection","Threat intelligence feeds"], attacks:["Firewall rule misconfiguration","Fragmentation bypass","Protocol tunneling (DNS, ICMP)","IPv6 bypass","Zero-day exploits"], vendors:["Palo Alto NGFW","Cisco Firepower","Fortinet FortiGate","Check Point","pfSense"] },
+  "Hub": { layer:1, icon:"📡", description:"A hub broadcasts all received data to every connected port regardless of destination. All ports share a single collision domain. Largely obsolete, replaced by switches.", howItWorks:["Receives electrical signal on one port","Regenerates/amplifies the signal","Broadcasts identical signal to ALL other ports","No intelligence — no MAC address learning","All connected devices share one collision domain","Half-duplex operation only"], keyFeatures:["Signal regeneration","Simple connectivity","No configuration required"], attacks:["Passive sniffing (all traffic visible)","Collision-based DoS","Network performance degradation"], vendors:["Legacy only — TP-Link, D-Link (discontinued)"] },
+  "Proxy Server": { layer:7, icon:"🔄", description:"A proxy server acts as an intermediary between clients and servers. Can cache content, filter traffic, anonymize users, and enforce security policies.", howItWorks:["Client sends request to proxy instead of directly to server","Forward proxy: forwards request on client's behalf","Reverse proxy: receives client requests, distributes to backend servers","Can inspect, modify, cache, or block requests based on policy","Logs all client activity for monitoring/compliance","SSL inspection proxies decrypt and re-encrypt HTTPS traffic"], keyFeatures:["Content caching","Access control","Anonymization","SSL inspection","Load distribution"], attacks:["SSRF (Server-Side Request Forgery)","Proxy bypass techniques","Squid proxy vulnerabilities","Open proxy abuse"], vendors:["Squid","NGINX (limit_req)","HAProxy","Zscaler","Blue Coat"] },
+  "Load Balancer": { layer:"4 or 7", icon:"⚖️", description:"Distributes incoming traffic across multiple servers to ensure reliability and performance. Layer 4 uses IP/TCP; Layer 7 can route based on HTTP content.", howItWorks:["Client connects to load balancer's VIP (Virtual IP)","Algorithm selects backend server (Round Robin, Least Connections, IP Hash)","L4: forwards TCP connection; L7: terminates connection and creates new one to backend","Health checks continuously verify backend server availability","Session persistence (sticky sessions) routes same client to same server","SSL termination offloads crypto from backend servers"], keyFeatures:["High availability","SSL termination","Health monitoring","Session persistence","Content-based routing"], attacks:["DDoS targeting load balancer","SSL exhaustion","Slow HTTP Attack (Slowloris)","Algorithm abuse (hash collision)"], vendors:["F5 Advanced WAF","NGINX (limit_req)","HAProxy","AWS API Gateway","Citrix ADC"] },
+  "NIC": { layer:"1–2", icon:"💻", description:"A Network Interface Card connects a computer to a network. Operates at Layer 1 (physical signals) and Layer 2 (MAC addressing). Every NIC has a unique 48-bit MAC address.", howItWorks:["Converts outgoing data into electrical/optical signals for transmission","Converts incoming signals back to digital data","Each NIC has a unique 48-bit MAC address (first 24 bits = OUI/vendor)","Operates in promiscuous mode for packet capture (Wireshark)","Hardware acceleration for checksum calculation and TCP offloading"], keyFeatures:["MAC address identification","Signal conversion","Hardware checksum offload","VLAN tagging","Promiscuous mode"], attacks:["MAC address spoofing","NIC firmware attacks (rare)","Promiscuous mode sniffing"], vendors:["Intel","Broadcom","Mellanox/NVIDIA","Realtek","Chelsio"] },
+  "WAP": { layer:2, icon:"📶", description:"A Wireless Access Point connects wireless devices to a wired LAN using Wi-Fi (IEEE 802.11). Bridges wireless and wired network segments.", howItWorks:["AP broadcasts beacon frames with SSID every ~100ms","Client sends Probe Request; AP responds with Probe Response","Authentication: Open, WPA2-Personal (PSK), or WPA2-Enterprise (802.1X)","4-way handshake derives session encryption keys from PMK","Data encrypted with CCMP (AES) for WPA2 or GCMP for WPA3","AP bridges wireless frames to wired Ethernet frames"], keyFeatures:["Multi-band operation (2.4/5/6 GHz)","MU-MIMO","WPA3 security","Band steering","Captive portal"], attacks:["Evil Twin Attack","Deauthentication Attack","PMKID Capture","KRACK","WPS Brute Force"], vendors:["Cisco Meraki","Ubiquiti UniFi","Aruba","Ruckus","TP-Link Omada"] }
+};
+
+// ═══ ATTACK DB ═══
+const ATTACK_DB = {
+  "SYN Flood": { layer:4, severity:"high", category:"Denial of Service", description:"A SYN Flood exploits the TCP 3-way handshake. Attacker sends massive SYN packets with spoofed IPs. The server allocates resources for each half-open connection until it runs out of memory — legitimate users can't connect.", howAttackWorks:["Attacker sends thousands of SYN packets with spoofed source IPs","Server responds with SYN-ACK and allocates TCB (Transmission Control Block)","No ACK ever arrives (spoofed IP) — server waits in SYN_RECEIVED state","Server's connection table fills up with half-open connections","Legitimate connections are rejected — service becomes unavailable"], tools:["hping3","Scapy","Metasploit","LOIC","Botnets"], hackerTypes:["Script Kiddie","Cybercriminal","Hacktivist"], defense:["SYN Cookies","Rate Limiting","Firewalls"], realWorld:"GitHub DDoS 2018 (1.35 Tbps), Dyn DNS Attack 2016" },
+  "UDP Flood": { layer:4, severity:"high", category:"Denial of Service", description:"A volumetric DoS attack where the attacker sends massive amounts of UDP packets to random ports on the target. Exhausts firewall session tables and target resources.", howAttackWorks:["Attacker generates huge volumes of UDP packets","Packets are sent to random/specific ports","Target checks for listening applications","Target responds with ICMP Unreachable","Target resources are exhausted"], tools:["hping3","LOIC","Botnets"], hackerTypes:["Script Kiddie","Cybercriminal"], defense:["Rate Limiting","Firewalls","Deep Packet Inspection"], realWorld:"Common in taking down gaming servers and streaming services." },
+  "ARP Spoofing": { layer:2, severity:"high", category:"Man-in-the-Middle", description:"ARP Spoofing sends fake ARP replies to associate the attacker's MAC with a victim's IP. This redirects all traffic through the attacker — enabling full man-in-the-middle interception. Affects entire LAN segments.", howAttackWorks:["Attacker sends gratuitous ARP replies to victim and gateway","Victim's ARP cache updated: gateway IP → attacker's MAC","Gateway's ARP cache updated: victim IP → attacker's MAC","All victim↔gateway traffic now routes through attacker","Attacker can read, modify, inject, or drop packets (MITM)"], tools:["Bettercap","Ettercap","Scapy"], hackerTypes:["Penetration Tester","Insider Threat"], defense:["Dynamic ARP Inspection (DAI)","802.1X","VLAN Segmentation"], realWorld:"Common in corporate pen tests, hotel network attacks, coffee shop MITM" },
+  "DNS Spoofing": { layer:7, severity:"critical", category:"Spoofing / MITM", description:"DNS Cache Poisoning injects malicious DNS records into a resolver's cache. Victims querying the poisoned resolver receive fake IPs pointing to attacker-controlled servers — redirecting millions of users silently.", howAttackWorks:["Attacker monitors DNS queries or predicts transaction IDs","Sends forged DNS response before legitimate server responds","Resolver caches the malicious IP→domain mapping","All clients using that resolver directed to attacker's server","Attacker serves fake login pages, malware, or intercepts traffic"], tools:["DNSChef","Bettercap","Metasploit"], hackerTypes:["APT Group","Cybercriminal"], defense:["DNSSEC","DNS over HTTPS (DoH)","Firewalls"], realWorld:"Kaminsky DNS Bug 2008, Brazilian banking DNS attack 2017" },
+  "BGP Hijacking": { layer:3, severity:"critical", category:"Routing Attack", description:"BGP Hijacking occurs when an AS advertises IP prefixes it doesn't own. Since BGP lacks authentication, routers worldwide accept fake routes, redirecting global internet traffic through the attacker. Can affect millions of users.", howAttackWorks:["Attacker controls a BGP router in an AS","Advertises more specific (longer prefix) route for victim's IP block","BGP's preference for longer prefixes causes traffic to route through attacker","Traffic can be blackholed, inspected, or silently re-routed","Attack can last minutes to hours before detection and withdrawal"], tools:["ExaBGP","Quagga/FRRouting"], hackerTypes:["APT Group"], defense:["RPKI","Route Authentication","ACLs"], realWorld:"Pakistan Telecom/YouTube 2008, Rostelecom/Amazon 2020, China Telecom incidents" },
+  "Evil Twin Attack": { layer:2, severity:"high", category:"Wireless Attack", description:"An Evil Twin is a rogue Wi-Fi AP mimicking a legitimate AP with the same SSID. Victims connect thinking it's the real network. The attacker performs MITM on all wireless traffic — capturing credentials, cookies, and sensitive data.", howAttackWorks:["Attacker discovers target SSID (e.g., 'CoffeeShop_WiFi')","Sets up rogue AP with identical SSID and stronger signal","Sends deauthentication frames to force victims off real AP","Victims reconnect — may join attacker's AP automatically","All victim traffic flows through attacker's device for capture/modification"], tools:["Aircrack-ng","Bettercap","WiFi Pineapple"], hackerTypes:["Penetration Tester","Cybercriminal"], defense:["802.1X","WPA3 with Protected Management Frames","VPN"], realWorld:"Common attack at airports, hotels, coffee shops, conferences" },
+  "SQL Injection": { layer:7, severity:"critical", category:"Application Attack", description:"SQL Injection inserts malicious SQL code into input fields concatenated into database queries. Can expose entire databases, modify/delete records, bypass authentication, and sometimes execute OS commands. One of the most devastating web attacks.", howAttackWorks:["Attacker finds input field that interacts with database (login, search)","Injects SQL syntax: ' OR '1'='1 to bypass authentication","Application passes unvalidated input to database engine","Database executes attacker's SQL: dumps tables, modifies records","Advanced: UNION-based, blind time-based, out-of-band exfiltration"], tools:["SQLMap","Burp Suite"], hackerTypes:["Script Kiddie","Penetration Tester","Cybercriminal"], defense:["Parameterized queries","WAF","Least privilege database accounts"], realWorld:"Heartland Payment Systems 2008 (130M cards), Sony Pictures 2011, Yahoo 2012" },
+  "MAC Flooding": { layer:2, severity:"medium", category:"Network Attack", description:"MAC Flooding overwhelms a switch's CAM table with random fake MAC addresses. When full, the switch enters fail-open mode broadcasting all frames like a hub — exposing all network traffic to the attacker.", howAttackWorks:["Attacker sends thousands of frames with random fake MAC addresses","Switch's CAM table has limited size (typically 8K-128K entries)","Table fills completely — switch can't learn new legitimate MACs","Switch enters fail-open: broadcasts ALL frames to ALL ports","Attacker's NIC (in promiscuous mode) captures all network traffic"], tools:["Yersinia","Scapy"], hackerTypes:["Insider Threat","Penetration Tester"], defense:["Port Security","802.1X","Dynamic ARP Inspection (DAI)"], realWorld:"Internal corporate network attacks, hotel/hospitality network attacks" },
+  "VLAN Hopping": { layer:2, severity:"high", category:"Network Segmentation Bypass", description:"VLAN Hopping lets an attacker access traffic on VLANs they shouldn't have access to. Breaks the fundamental assumption that VLANs provide security isolation. Two methods: Switch Spoofing and Double Tagging.", howAttackWorks:["Switch Spoofing: attacker sends DTP frames to negotiate trunk link","Switch responds, establishing trunk — attacker accesses all VLANs","Double Tagging: attacker on native VLAN sends doubly-tagged frames","First switch strips outer tag (native VLAN), forwards to trunk","Second switch reads inner tag and delivers to target VLAN (one-way only)"], tools:["Yersinia","Scapy"], hackerTypes:["Insider Threat","Penetration Tester"], defense:["Disable DTP","Change native VLAN","VLAN Segmentation"], realWorld:"Common in corporate pen tests, misconfigured network environments" },
+  "SSL Stripping": { layer:6, severity:"high", category:"HTTPS Downgrade", description:"SSL Stripping downgrades HTTPS connections to HTTP by intercepting the initial HTTP request before the TLS upgrade. The victim browses in plaintext without knowing — all credentials and data visible to the attacker.", howAttackWorks:["Attacker performs ARP spoofing to position as MITM","Intercepts victim's initial HTTP request (before HTTPS redirect)","Attacker connects to server over HTTPS — receives encrypted page","Strips TLS from responses, serves HTTP to victim","Victim sees HTTP site — credentials submitted in plaintext"], tools:["SSLstrip","Bettercap"], hackerTypes:["Cybercriminal","Penetration Tester"], defense:["HSTS","TLS/SSL","VPN"], realWorld:"Common in coffee shop/hotel attacks, especially on sites without HSTS" },
+  "POODLE Attack": { layer:6, severity:"medium", category:"Protocol Downgrade", description:"POODLE (Padding Oracle On Downgraded Legacy Encryption) exploits vulnerabilities in SSLv3's CBC mode. An attacker can force a downgrade to SSLv3, then use the padding oracle to decrypt HTTPS cookies one byte at a time.", howAttackWorks:["Attacker triggers 40+ connection retries (e.g., via JavaScript)","During TLS negotiation failure, some clients fall back to SSLv3","Attacker manipulates CBC-mode blocks to create padding oracle","Iteratively test each byte value (256 attempts per byte)","After ~256*16 requests, full cookie decrypted"], tools:["OpenSSL test commands","Custom scripts"], hackerTypes:["APT Group","Penetration Tester"], defense:["Disable SSLv3","TLS/SSL Configuration","Modern cipher suites"], realWorld:"Google researchers 2014 — forced deprecation of SSLv3 across the internet" },
+  "HEARTBLEED": { layer:6, severity:"critical", category:"Memory Disclosure", description:"Heartbleed (CVE-2014-0160) was a buffer over-read in OpenSSL's TLS heartbeat extension. Attackers could read 64KB of server memory — exposing private keys, passwords, and session tokens without leaving traces.", howAttackWorks:["TLS heartbeat: client sends message with declared length","OpenSSL bug: server doesn't validate actual vs declared length","Attacker sends heartbeat claiming 64KB but only 1 byte","Server returns 64KB of adjacent memory contents","Repeated exploitation leaks different memory segments"], tools:["Metasploit","Nmap"], hackerTypes:["APT Group","Cybercriminal","Penetration Tester"], defense:["Patch OpenSSL","Revoke and reissue certificates","Rotate all passwords"], realWorld:"April 2014 — estimated 500,000 servers affected; Canadian tax agency breached" },
+  "Deauthentication Attack": { layer:2, severity:"medium", category:"Wireless DoS", description:"Wi-Fi deauthentication attack exploits the 802.11 management frame lack of authentication. Attacker forges deauth frames forcing clients to disconnect from legitimate APs — used standalone as DoS or as setup for Evil Twin attacks.", howAttackWorks:["Attacker identifies target AP BSSID and client MAC via passive sniffing","Crafts spoofed deauthentication frame from AP to client","Sends burst of deauth frames at high rate","Client receives deauth, disconnects from AP","Client attempts to reconnect — may join attacker's Evil Twin AP"], tools:["Aircrack-ng","WiFi Pineapple","Bettercap"], hackerTypes:["Penetration Tester","Cybercriminal"], defense:["WPA3 with Protected Management Frames","Wireless IDS"], realWorld:"Used at conferences, hotels, and targeted against specific individuals" },
+  "Pass-the-Hash": { layer:5, severity:"high", category:"Credential Attack", description:"Pass-the-Hash uses a captured NTLM password hash directly — without cracking it to plaintext. Windows authentication protocols accept the hash itself, so attackers can impersonate users across the network without knowing passwords.", howAttackWorks:["Attacker compromises one Windows host (via exploit or phishing)","Dumps NTLM hashes from LSASS memory using Mimikatz","Hash passed directly in NTLM authentication to other systems","No need to crack hash — hash IS the credential","Lateral movement across all systems using same password hash"], tools:["Mimikatz","Metasploit"], hackerTypes:["APT Group","Cybercriminal","Penetration Tester"], defense:["Credential Guard","Privileged Access Workstations","Disable NTLM"], realWorld:"Used in almost every major ransomware attack for lateral movement" },
+  "Kerberoasting": { layer:5, severity:"high", category:"Credential Attack", description:"Kerberoasting requests Kerberos service tickets for service accounts, extracts the ticket (encrypted with service account's NTLM hash), and cracks it offline. Service accounts often have weak passwords and don't expire — making this highly effective.", howAttackWorks:["Authenticated domain user queries Active Directory for SPNs (Service Principal Names)","Requests Kerberos TGS ticket for each SPN-associated service account","Ticket encrypted with service account's NTLM hash (RC4 or AES)","Ticket extracted from memory and exported for offline cracking","Hashcat/John cracks ticket hash to reveal service account password"], tools:["Mimikatz","Hashcat"], hackerTypes:["APT Group","Penetration Tester","Cybercriminal"], defense:["Managed Service Accounts","AES encryption for Kerberos tickets","Strong passwords"], realWorld:"Used in most major Active Directory breaches — often leads to domain admin" },
+  "NTLM Relay": { layer:5, severity:"critical", category:"Authentication Attack", description:"NTLM Relay captures NTLM authentication attempts and relays them to other systems — authenticating as the victim without knowing their password. Attackers can use Responder to harvest credentials then relay to SMB, LDAP, or MSSQL.", howAttackWorks:["Attacker runs Responder to poison LLMNR/NBT-NS responses on LAN","Victim's machine attempts to resolve non-existent hostname","Responder poisons response — victim sends NTLM auth to attacker","Attacker relays NTLM to target server (SMB, LDAP, MSSQL)","If relayed successfully, attacker authenticated as victim on target"], tools:["Responder"], hackerTypes:["Penetration Tester","APT Group","Cybercriminal"], defense:["Disable LLMNR via Group Policy","Enable SMB Signing","Network Segmentation"], realWorld:"Used in nearly all Active Directory penetration tests" },
+  "Phishing": { layer:7, severity:"high", category:"Social Engineering", description:"Deceptive communication designed to trick users into revealing sensitive information, such as credentials or installing malware.", howAttackWorks:["Attacker crafts convincing email/website mimicking legitimate entity","Sends to target user","User clicks link or opens attachment","User inputs credentials into fake portal","Attacker harvests credentials"], tools:["Social Engineering Toolkit","GoPhish","Metasploit"], hackerTypes:["Cybercriminal","APT Group","Script Kiddie"], defense:["Email Filtering","MFA","Security Awareness Training","Firewalls"], realWorld:"Responsible for over 80% of initial enterprise network breaches." },
+  "Port Scanning": { layer:4, severity:"low", category:"Reconnaissance", description:"The process of probing a server or host for open ports. Not an attack itself, but the precursor to almost all network attacks.", howAttackWorks:["Attacker sends TCP/UDP packets to target ports","Analyzes responses (SYN-ACK, RST, ICMP)","Identifies listening services and OS","Maps attack surface for vulnerabilities"], tools:["Nmap","Scapy","Metasploit"], hackerTypes:["Penetration Tester","Cybercriminal","APT Group"], defense:["Port Filtering","Firewalls","Rate Limiting"], realWorld:"Constant background noise on the public internet." },
+  "Slowloris": { layer:7, severity:"medium", category:"Denial of Service", description:"A slow HTTP DoS attack that attempts to keep many connections to the target web server open and hold them open as long as possible.", howAttackWorks:["Attacker opens multiple connections to target web server","Sends partial HTTP requests","Periodically sends subsequent HTTP headers to keep connections alive","Never completes the request","Server's maximum concurrent connection pool is exhausted"], tools:["Slowloris script","LOIC"], hackerTypes:["Script Kiddie","Hacktivist"], defense:["Reverse Proxy (NGINX)","WAF","Rate Limiting","Connection Timeouts"], realWorld:"Historically used by hacktivist groups to take down political websites." }
+};
+
+// ═══ HACKER DB ═══
+const HACKER_DB = {
+  "Script Kiddie": { icon:"👾", hat:"Grey/Black", description:"Script kiddies use pre-made tools and scripts without deeply understanding how they work. They typically target easy, unpatched systems and are motivated by notoriety rather than financial gain or espionage. The internet's noise — numerous but unsophisticated.", motivation:"Fame, bragging rights, mischief", skillLevel:"Low — relies on automated tools", targets:["Unpatched web servers","Default credentials","Easy CVEs","Online gaming servers","DDoS-for-hire targets"], tools:["LOIC","Metasploit","SQLMap","Nmap"], typicalAttacks:["SYN Flood","UDP Flood","SQL Injection","Phishing"], osi_focus:"Layer 7 (web apps), Layer 4 (DDoS)", realWorldExamples:"Minecraft server attacks, gaming DDoS, crude website defacements, opportunistic vulnerability scanning" },
+  "Penetration Tester": { icon:"🔍", hat:"White", description:"Penetration testers (ethical hackers) are hired to find vulnerabilities before malicious actors do. They follow strict rules of engagement, document all findings, and help organizations improve security. Require certifications (CEH, OSCP, CISSP, GPEN).", motivation:"Improving security, professional development, legal income (well-paid)", skillLevel:"High — deep knowledge across all layers", targets:["Client's own infrastructure (with written permission)","Web applications, networks, wireless","Social engineering targets","Source code review"], tools:["Burp Suite","Metasploit","Nmap","Wireshark","Bettercap"], typicalAttacks:["Port Scanning","ARP Spoofing","SQL Injection","Kerberoasting"], osi_focus:"All 7 layers", realWorldExamples:"Corporate red team engagements, bug bounty programs, compliance-required pen tests (PCI-DSS, ISO 27001)" },
+  "APT Group": { icon:"🏴", hat:"Black (Nation-State)", description:"Advanced Persistent Threats are sophisticated, state-sponsored or organized criminal groups conducting long-duration campaigns. They use custom tools, zero-days, and deep reconnaissance. Examples: Lazarus Group (North Korea), APT28/Fancy Bear (Russia), APT41 (China).", motivation:"Espionage, intellectual property theft, financial gain, sabotage, disruption", skillLevel:"Expert — custom malware, zero-days, advanced OpSec", targets:["Government agencies","Defense contractors","Critical infrastructure (power grids, water treatment)","Financial institutions","Technology companies"], tools:["Custom malware","Zero-day exploits","ExaBGP","Cobalt Strike"], typicalAttacks:["BGP Hijacking","Phishing","DNS Spoofing","Pass-the-Hash"], osi_focus:"Layer 7 (initial access) → all layers (lateral movement)", realWorldExamples:"SolarWinds (2020), Colonial Pipeline (2021), NotPetya (2017), Operation Aurora (Google, 2009)" },
+  "Insider Threat": { icon:"🕵️", hat:"Grey", description:"Insider threats are current or former employees, contractors, or partners who misuse their legitimate access. They may be malicious (selling data), negligent (mishandling data), or compromised (credentials stolen by attackers).", motivation:"Financial gain, revenge, coercion, ideology, or simple negligence", skillLevel:"Variable — but has legitimate access advantage", targets:["Internal databases","Intellectual property","Customer data","Source code","Trade secrets"], tools:["USB drives","Cloud storage (personal accounts)","Email exfiltration","Legitimate admin tools"], typicalAttacks:["ARP Spoofing","MAC Flooding","Data exfiltration"], osi_focus:"Layer 7 (application access), Layer 2 (physical LAN access)", realWorldExamples:"Edward Snowden (2013), Tesla IP theft (2023), Capital One breach (2019), numerous healthcare data thefts" },
+  "Hacktivist": { icon:"✊", hat:"Grey", description:"Hacktivists conduct attacks to promote political or social causes. Groups like Anonymous are prominent examples. They typically aim for public impact — defacements, DDoS, or leaking sensitive information to embarrass organizations.", motivation:"Political/ideological causes, social justice, protest, environmental causes", skillLevel:"Low to High — varies widely by member", targets:["Government websites","Corporations they disagree with","Media outlets","Religious organizations"], tools:["LOIC","SQLMap","Social engineering","Crowdsourced DDoS tools"], typicalAttacks:["SYN Flood","Slowloris","SQL Injection","Phishing"], osi_focus:"Layer 7 (web attacks), Layer 4 (DDoS)", realWorldExamples:"Anonymous vs. HBGary (2011), OpISIS campaign, WikiLeaks DDoS retaliation (2010), OpRussia (2022)" },
+  "Cybercriminal": { icon:"💰", hat:"Black", description:"Cybercriminals are financially motivated attackers operating ransomware, banking fraud, carding, or providing crime-as-a-service (RaaS kits, botnets for hire). They operate in dark web forums with professionalized, role-based operations.", motivation:"Financial profit — ransomware payments, fraud proceeds, selling stolen data", skillLevel:"Medium to High — specialized by role in criminal ecosystem", targets:["Businesses (ransomware double-extortion)","Banks and payment systems","Individuals (phishing/scams)","Healthcare for high-value data"], tools:["Ransomware-as-a-Service kits","Exploit kits","Phishing platforms","Burp Suite","Metasploit"], typicalAttacks:["Phishing","SSL Stripping","Pass-the-Hash","NTLM Relay"], osi_focus:"Layer 7 (phishing, web), Layer 4 (C2 communication)", realWorldExamples:"REvil (Kaseya 2021 — $70M demand), Lazarus Bank heists, Carbanak ($1B banking fraud), FIN7" }
+};
+
+// ═══ TOOL DB ═══
+const TOOL_DB = {
+  "Bettercap": { category:"MITM / Network Attack Framework", layer:"Layer 2-7", type:"Offensive", description:"Bettercap is a comprehensive, modular network attack and monitoring framework. Considered the evolution of Ettercap. Used for ARP spoofing, DNS spoofing, SSL stripping, HTTPS downgrade attacks, Wi-Fi attacks, and more.", capabilities:["ARP spoofing to intercept LAN traffic","DNS spoofing to redirect domain resolution","SSL stripping to downgrade HTTPS to HTTP","Wi-Fi evil twin AP creation","BLE (Bluetooth Low Energy) attacks","Packet capture and injection"], installation:"go install github.com/bettercap/bettercap@latest", legalNote:"Authorized penetration testing only. Using against networks you don't own is illegal.", countermeasures:["Dynamic ARP Inspection (DAI)","HSTS","802.1X","WPA3 with PMF"] },
+  "Metasploit": { category:"Exploitation Framework", layer:"All Layers", type:"Offensive", description:"Metasploit is the world's most widely used penetration testing framework. Contains hundreds of exploits, payloads, and auxiliary modules for vulnerabilities across all OSI layers. The gold standard for professional pen testing.", capabilities:["Exploit known CVEs across all protocols and layers","Generate payloads (Meterpreter shells)","Post-exploitation: pivoting, privilege escalation","Auxiliary scanners for reconnaissance","Integration with Nmap, Nessus, Burp Suite"], installation:"Included in Kali Linux. msfconsole to launch.", legalNote:"Written authorization required. Metasploit exploits are powerful — test only in sanctioned environments.", countermeasures:["Firewalls","Deep Packet Inspection","Patch management","EDR (CrowdStrike, SentinelOne)"] },
+  "Nmap": { category:"Network Scanner / Reconnaissance", layer:"Layer 3-7", type:"Dual-Use", description:"Nmap (Network Mapper) is the industry-standard tool for network discovery and security auditing. Maps hosts, open ports, services, OS versions, and scripts NSE vulnerability checks. Authorized use is legal.", capabilities:["Port scanning (TCP SYN, UDP, FIN, Xmas scans)","OS fingerprinting","Service version detection","NSE script engine for vulnerability checks","Network topology mapping"], installation:"nmap.org — included in Kali Linux", legalNote:"Legal when scanning your own networks or with explicit permission. Scanning without permission may violate laws.", countermeasures:["Port Filtering","Firewalls","Rate Limiting"] },
+  "Wireshark": { category:"Packet Analyzer / Network Forensics", layer:"All Layers", type:"Dual-Use", description:"Wireshark is the world's most popular network protocol analyzer. Captures and dissects every byte of network traffic across all protocols. Essential for network troubleshooting, security analysis, and learning.", capabilities:["Real-time packet capture on all interfaces","Deep protocol dissection (800+ protocols)","Follow TCP/HTTP streams","Export credentials from captured traffic","TLS decryption with private keys"], installation:"wireshark.org — available on all platforms", legalNote:"Legal on your own networks. Capturing others' traffic (on switches without port mirroring) requires authorization.", countermeasures:["TLS/SSL","VPN","IPSec"] },
+  "Aircrack-ng": { category:"Wi-Fi Security Auditing Suite", layer:"Layer 1-2", type:"Offensive", description:"Aircrack-ng is a complete suite of Wi-Fi security tools. Includes airodump-ng (capture), aireplay-ng (injection), airbase-ng (rogue AP), and aircrack-ng (cracking). Standard toolkit for wireless penetration testing.", capabilities:["WPA/WPA2 handshake capture","PMKID attack (no client needed)","Deauthentication and deassociation attacks","Evil Twin AP creation","WEP cracking (deprecated protocol)","WPS PIN brute force"], installation:"aircrack-ng.org — included in Kali Linux", legalNote:"Use only on networks you own or have explicit written permission to test.", countermeasures:["802.1X","WPA3 with SAE"] },
+  "Mimikatz": { category:"Credential Extraction Tool", layer:"Layer 5-7 (Post-Exploitation)", type:"Offensive", description:"Mimikatz is the most famous Windows credential extraction tool. Extracts plaintext passwords, NTLM hashes, Kerberos tickets, and certificates from Windows memory (LSASS). Central to most enterprise breaches and Active Directory attacks.", capabilities:["Extract NTLM hashes from LSASS memory","Dump plaintext passwords (Windows older versions)","Export Kerberos tickets for Pass-the-Ticket","Create Golden and Silver Tickets","DCSync: replicate AD credentials from Domain Controller","Dump cached credentials and secrets"], installation:"github.com/gentilkiwi/mimikatz", legalNote:"Extremely destructive tool. Authorized use only. Detection tools will flag Mimikatz within seconds in modern EDR-protected environments.", countermeasures:["Credential Guard","Restrict LSASS access"] },
+  "Burp Suite": { category:"Web Application Security Testing", layer:"Layer 7", type:"Dual-Use", description:"Burp Suite is the industry-standard web application security testing platform used by professional penetration testers and bug bounty hunters worldwide. The proxy intercepts and modifies every HTTP/HTTPS request.", capabilities:["HTTP/HTTPS proxy — intercept and modify requests","Active scanner for vulnerabilities (Pro edition)","Intruder for fuzzing and brute force","Repeater for manual request manipulation","Sequencer for token randomness analysis","Extensions via BApp Store (SQLi, XSS scanners)"], installation:"portswigger.net — Community (free) and Pro ($449/yr)", legalNote:"Legal on authorized targets. Bug bounty programs explicitly permit Burp Suite usage within scope.", countermeasures:["WAF","Rate Limiting"] },
+  "SQLMap": { category:"SQL Injection Automation", layer:"Layer 7", type:"Offensive", description:"SQLMap is an open-source penetration testing tool that automates detection and exploitation of SQL injection vulnerabilities. Supports all major database engines (MySQL, PostgreSQL, MSSQL, Oracle) and can dump entire databases.", capabilities:["Automatic SQLi vulnerability detection","Boolean-based, time-based, UNION, error-based injection","Database fingerprinting and version detection","Database, table, column, and data extraction","File system access and OS command execution","WAF bypass techniques and tamper scripts"], installation:"sqlmap.org — included in Kali Linux. python sqlmap.py", legalNote:"Extremely powerful. Authorized testing only. Can destroy databases if misconfigured.", countermeasures:["Parameterized queries","WAF","Least privilege database accounts"] },
+  "Hashcat": { category:"Password Cracking", layer:"Layer 5-7 (Credential Attack)", type:"Offensive", description:"Hashcat is the world's fastest password cracker using GPU acceleration. Supports 300+ hash algorithms. Used to crack NTLM hashes, Kerberos tickets, bcrypt, WPA2, and virtually any hash format.", capabilities:["GPU-accelerated cracking (NVIDIA/AMD)","Dictionary attacks with rules","Brute force with masks","Combinator attacks","Fingerprint attacks","Distributed cracking across multiple GPUs"], installation:"hashcat.net — hashcat -m [hash_type] [hash_file] [wordlist]", legalNote:"Legal to crack your own hashes. Cracking stolen credentials is illegal.", countermeasures:["Strong passwords","bcrypt/Argon2","MFA"] },
+  "Nessus": { category:"Vulnerability Scanner", layer:"All Layers", type:"Dual-Use", description:"Nessus by Tenable is the world's most deployed vulnerability assessment tool. Discovers vulnerabilities, misconfigurations, and compliance issues across networks, systems, and applications. Over 100,000 vulnerability plugins.", capabilities:["Network vulnerability scanning","Compliance auditing (PCI-DSS, HIPAA, CIS)","Malware detection","Configuration auditing","Credential-based deep scanning","Patch detection and prioritization"], installation:"tenable.com — Nessus Essentials free for non-commercial", legalNote:"Authorized scanning only. Vulnerability scanning may trigger security alerts and requires explicit permission.", countermeasures:["Patch management","Network Segmentation","Firewalls"] },
+  "ExaBGP": { category:"BGP Manipulation Tool", layer:"Layer 3", type:"Dual-Use", description:"ExaBGP is a BGP daemon and framework allowing manipulation of BGP routing. Used by network engineers for traffic engineering and by security researchers to test BGP hijacking scenarios.", capabilities:["Send arbitrary BGP announcements","Withdraw routes","Inject malformed BGP updates","Test BGP filtering and validation","Simulate BGP hijacking in lab environments"], installation:"pip install exabgp", legalNote:"Only use on your own network infrastructure or in authorized lab environments. BGP manipulation can affect global internet routing.", countermeasures:["RPKI","Route Authentication","ACLs"] },
+  "hping3": { category:"Network Packet Crafting / DoS Testing", layer:"Layer 3-4", type:"Offensive", description:"hping3 is a command-line TCP/IP packet assembler and analyzer. Sends custom TCP, UDP, ICMP, and RAW-IP packets. Used for firewall testing, port scanning, network performance testing, and simulating DoS attacks.", capabilities:["Craft custom TCP/UDP/ICMP packets with specific flags","SYN flood simulation for DoS testing","Firewall rule testing and auditing","OS fingerprinting","Traceroute with TCP/UDP packets","Network performance measurement"], installation:"Included in Kali Linux. hping3 --help", legalNote:"DoS testing requires explicit authorization. Never flood third-party systems.", countermeasures:["SYN Cookies","Rate Limiting","Firewalls"] },
+  "Scapy": { category:"Packet Crafting / Protocol Testing", layer:"All Layers", type:"Dual-Use", description:"Scapy is a powerful Python library for packet crafting, manipulation, and analysis. Can forge or decode packets of numerous protocols, send them, capture them, and match requests and replies.", capabilities:["Craft any protocol packet from scratch","ARP spoofing and packet injection","Protocol fuzzing and testing","Network scanning and discovery","Traceroute and network visualization","PCAP file manipulation"], installation:"pip install scapy — import scapy.all", legalNote:"Packet injection requires network access authorization. Use responsibly in controlled environments.", countermeasures:["802.1X","Dynamic ARP Inspection (DAI)","TLS/SSL"] },
+  "Yersinia": { category:"Layer 2 Attack Framework", layer:"Layer 2", type:"Offensive", description:"Yersinia is a network tool designed to take advantage of weaknesses in Layer 2 protocols: STP, CDP, DHCP, 802.1Q, VTP, HSRP. Often used to perform VLAN hopping, STP root bridge attacks, and DHCP starvation.", capabilities:["STP Root Bridge Attack","VLAN hopping via DTP trunk negotiation","DHCP starvation attacks","CDP information disclosure","VTP domain attacks","HSRP router takeover"], installation:"yersinia -G (GUI) or yersinia -I (interactive) — Kali Linux", legalNote:"Layer 2 attacks require physical LAN access. Authorized testing in enterprise networks only.", countermeasures:["BPDU Guard","Disable DTP","Port Security"] },
+  "WiFi Pineapple": { category:"Wi-Fi Audit Hardware", layer:"Layer 1-2", type:"Offensive", description:"The Wi-Fi Pineapple by Hak5 is a dedicated hardware device for Wi-Fi auditing and man-in-the-middle attacks. Makes creating evil twins and deauth attacks point-and-click easy. Popular in penetration testing.", capabilities:["Automated evil twin AP creation","Targeted deauthentication to force reconnection","Captive portal for credential harvesting","DNS spoofing for all connected clients","WPA handshake capture","Real-time traffic monitoring and injection"], installation:"Shop at hak5.org. Web-based management interface.", legalNote:"Authorized Wi-Fi security assessments only. Unauthorized use is a federal crime.", countermeasures:["WPA3 with Protected Management Frames","802.1X","VPN"] },
+  "Ettercap": { category:"LAN MITM Framework", layer:"Layer 2-7", type:"Offensive", description:"Ettercap is a comprehensive suite for LAN-based man-in-the-middle attacks. Features sniffing of live connections, content filtering, and ARP poisoning. The predecessor to Bettercap.", capabilities:["ARP poisoning for MITM","Live connection sniffing","Credential capture (cleartext protocols)","Content filtering and injection","Plugin-based architecture","DNS spoofing"], installation:"ettercap -G (GUI) — included in Kali Linux", legalNote:"Authorized testing only on networks you control or have permission to test.", countermeasures:["Dynamic ARP Inspection (DAI)","TLS/SSL","802.1X"] },
+  "Responder": { category:"LLMNR/NBT-NS Poisoning", layer:"Layer 5-7", type:"Offensive", description:"Responder poisons LLMNR, NBT-NS, and mDNS name resolution requests to capture NTLMv2 hashes from Windows machines. One of the most effective tools for internal network credential harvesting.", capabilities:["LLMNR/NBT-NS/mDNS poisoning","NTLMv2 hash capture via rogue servers","SMB, HTTP, FTP, SQL server simulation","Hash capture for offline cracking","Integration with ntlmrelayx for relay attacks","IPv6 DNS takeover (mitm6)"], installation:"python3 Responder.py -I eth0 — github.com/lgandx/Responder", legalNote:"Authorized internal penetration tests only. Captures real domain credentials in active environments.", countermeasures:["Disable LLMNR via Group Policy","Disable NBT-NS","Enable SMB Signing"] },
+  "DNSChef": { category:"DNS Proxy / Spoofer", layer:"Layer 7", type:"Offensive", description:"DNSChef is a highly configurable DNS proxy used for application network traffic analysis, DNS spoofing, and bypassing DNS-based security controls during penetration tests.", capabilities:["Selective DNS spoofing by domain","Full DNS proxy for traffic analysis","Real DNS forwarding for unmatched queries","Malware analysis in isolated environments","Custom DNS record injection","Integration with other MITM tools"], installation:"pip install dnschef — python dnschef.py", legalNote:"Authorized testing and malware analysis environments only.", countermeasures:["DNSSEC","DNS over HTTPS (DoH)","Network Segmentation"] },
+  "SSLstrip": { category:"HTTPS Downgrade Tool", layer:"Layer 6-7", type:"Offensive", description:"SSLstrip transparently hijacks HTTP traffic on a network, watches for HTTPS links and redirects, then maps those links into HTTP or homograph HTTPS links. Makes victims browse insecurely without knowing.", capabilities:["HTTPS to HTTP downgrade","Intercept HTTP→HTTPS redirects","Cookie harvesting (session hijacking)","HSTS bypass for non-preloaded domains","Favicon favicon spoofing (padlock icon)"], installation:"pip install sslstrip — sslstrip -l 10000", legalNote:"Authorized MITM tests only. Modern HSTS preloading defeats this on major sites.", countermeasures:["HSTS"] }
+};
+
+const LAYERS = [
+  { num:7, name:'Application', subtitle:'Human-Computer Interaction', color:'#f97316', pdu:'Data', desc:'The Application layer provides network services directly to user applications. It handles high-level protocols, user interface interaction, and data presentation for the end user.', protocols:['HTTP/HTTPS','FTP','SMTP','DNS','SSH'], devices:['Proxy Server','Load Balancer'], security:['WAF','OAuth 2.0','JWT','API Keys','CAPTCHA'], functions:['Identifies communication partner availability','Determines resource availability for communication','Provides services like file transfer, email, and remote login','Handles application-level authentication and authorization'], attacks:['SQL Injection','DNS Spoofing','Phishing','Slowloris'], tools:['SQLMap','Burp Suite','DNSChef'], hackerTypes:['Script Kiddie','APT Group','Cybercriminal','Hacktivist'], threatSummary:"Layer 7 is the most attacked layer because it's directly exposed to users. SQL injection, XSS, and protocol abuse are common. Attackers target authentication, session management, and data inputs." },
+  { num:6, name:'Presentation', subtitle:'Data Translation & Encryption', color:'#a855f7', pdu:'Data', desc:'The Presentation layer translates data between application and network formats. It handles encryption, compression, and character encoding conversion.', protocols:['TLS/SSL'], devices:['Firewall'], security:['AES-256','RSA','X.509 Certificates','TLS/SSL'], functions:['Translation between different data formats and encodings','Data encryption and decryption for secure transmission','Data compression to reduce bandwidth requirements'], attacks:['SSL Stripping','POODLE Attack','HEARTBLEED'], tools:['SSLstrip','Bettercap'], hackerTypes:['APT Group','Penetration Tester','Cybercriminal'], threatSummary:"Attackers target encryption weaknesses and downgrade attacks at Layer 6. SSL stripping converts HTTPS to HTTP, while protocol vulnerabilities like POODLE and HEARTBLEED expose decrypted data." },
+  { num:5, name:'Session', subtitle:'Session Management & Control', color:'#ec4899', pdu:'Data', desc:'The Session layer establishes, manages, and terminates sessions between applications. It handles dialog control, checkpointing, and session recovery.', protocols:[], devices:['Firewall'], security:['Kerberos','RADIUS','Session Tokens','CHAP'], functions:['Establishes, maintains, and terminates communication sessions','Implements dialog control (simplex, half-duplex, full-duplex)','Synchronizes data exchange between communicating systems'], attacks:['Pass-the-Hash','Kerberoasting','NTLM Relay'], tools:['Mimikatz','Responder'], hackerTypes:['APT Group','Insider Threat','Penetration Tester'], threatSummary:"Session layer attacks focus on stealing or forging authentication tokens. NTLM relay, Kerberoasting, and pass-the-hash are devastating in Active Directory environments, often leading to domain compromise." },
+  { num:4, name:'Transport', subtitle:'End-to-End Communication', color:'#06b6d4', pdu:'Segment', desc:'The Transport layer provides reliable, end-to-end data transfer. It handles segmentation, error recovery, flow control, and port-based multiplexing using TCP and UDP.', protocols:['TCP','UDP','QUIC'], devices:['Firewall','Load Balancer'], security:['Port Filtering','Deep Packet Inspection','SYN Cookies','Rate Limiting'], functions:['Segmentation and reassembly of data streams','End-to-end error detection and correction (TCP)','Port-based multiplexing (source/destination ports)'], attacks:['SYN Flood','UDP Flood','Port Scanning'], tools:['hping3','Nmap','Scapy','Metasploit'], hackerTypes:['Script Kiddie','Cybercriminal','Penetration Tester'], threatSummary:"Transport layer is targeted for DoS/DDoS attacks exploiting TCP's stateful nature. SYN floods exhaust server resources. Port scanning maps attack surface. Session hijacking steals established connections." },
+  { num:3, name:'Network', subtitle:'Logical Addressing & Routing', color:'#22c55e', pdu:'Packet', desc:'The Network layer handles logical addressing and routing across multiple networks. Routers forward packets using IP addresses and routing protocols.', protocols:['IPv4','IPv6','BGP','OSPF','IPSec'], devices:['Router','Firewall'], security:['IPSec','ACLs','Firewalls','RPKI','Route Authentication'], functions:['Logical IP addressing (IPv4/IPv6)','Packet routing across interconnected networks','Path determination using routing algorithms'], attacks:['BGP Hijacking','Smurf Attack'], tools:['ExaBGP','hping3','Scapy'], hackerTypes:['APT Group','Script Kiddie','Penetration Tester'], threatSummary:"Network layer attacks can affect global internet routing (BGP hijacking), bypass firewalls via IP spoofing, or overwhelm devices with crafted packets. OSPF injection can reroute entire enterprise traffic." },
+  { num:2, name:'Data Link', subtitle:'Frame Transmission & MAC', color:'#eab308', pdu:'Frame', desc:'The Data Link layer provides node-to-node data transfer on local networks using MAC addresses. It handles framing, error detection, and media access control.', protocols:['Ethernet','Wi-Fi (802.11)','ARP'], devices:['Switch','WAP','NIC'], security:['Port Security','802.1X','BPDU Guard','VLAN Segmentation','MAC Filtering'], functions:['Physical (MAC) addressing using 48-bit MAC addresses','Error detection via CRC (Cyclic Redundancy Check)','VLAN tagging (802.1Q) and trunking'], attacks:['MAC Flooding','ARP Spoofing','VLAN Hopping','Evil Twin Attack','Deauthentication Attack'], tools:['Bettercap','Yersinia','WiFi Pineapple','Ettercap','Aircrack-ng'], hackerTypes:['Insider Threat','Penetration Tester','Cybercriminal'], threatSummary:"Data Link attacks require network access but are powerful. ARP spoofing enables MITM on entire LAN segments. MAC flooding turns switches into hubs, exposing all traffic. VLAN hopping breaks network segmentation." },
+  { num:1, name:'Physical', subtitle:'Raw Bit Transmission', color:'#ef4444', pdu:'Bit', desc:'The Physical layer handles raw bit transmission over physical media. It defines electrical, mechanical, and procedural specifications for transmitting data through cables, fiber, or wireless.', protocols:[], devices:['Hub','NIC'], security:['Physical Access Control'], functions:['Bit-level transmission over physical media','Defines electrical signal standards (voltage, frequency, timing)','Specifies cable types, connectors, and pin arrangements'], attacks:[], tools:[], hackerTypes:['Insider Threat'], threatSummary:"Physical layer attacks require physical proximity but are nearly undetectable by software. Cable taps, signal jamming, and hardware implants (BadUSB, hardware keyloggers) bypass all software security controls." }
+];
+
+let activeLayer = 0, activeInnerTab = 'overview', currentView = 'stack', quizState = {};
+let mmTransform = {x:0,y:0,scale:1}, mmDrag = {active:false,startX:0,startY:0,originX:0,originY:0};
+let highlightedNode = null, mmCanvas, mmCtx, mmNodes = [];
+
+let modalHistory = [];
+let currentModalType = null;
+let currentModalKey = null;
+
+function switchView(view, el) {
+  currentView = view;
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(`view-${view}`).classList.add('active');
+  if(el) el.classList.add('active');
+  if(view==='mindmap') setTimeout(initMindMap,50);
+  if(view==='comparison') renderComparison();
+  if(view==='encapsulation') renderEncapsulation();
+  if(view==='hackers') renderHackerHub();
+  if(view==='quiz'&&!quizState.initialized) initQuiz();
+}
+
+function openModal(type, key, isBack = false) {
+  const overlay=document.getElementById('modalOverlay'), body=document.getElementById('modalBody');
+  const headerContent = document.getElementById('modalHeaderContent');
+  
+  if (!isBack && overlay.classList.contains('show')) {
+      modalHistory.push({ type: currentModalType, key: currentModalKey });
+  } else if (!isBack) {
+      modalHistory = []; 
+  }
+  
+  currentModalType = type;
+  currentModalKey = key;
+
+  const backBtnHtml = modalHistory.length > 0 
+    ? `<button class="btn btn-ghost" style="padding:4px 10px; font-size:11px; margin-bottom:12px; border-radius:6px; color:#94a3b8" onclick="goBackModal()">← Back to Previous</button>` 
+    : '';
+
+  let data, html='';
+  let mBadge='', mStyle='', mTitle='', mSub='';
+  
+  if(type==='glossary') {
+    const def = GLOSSARY_DB[key];
+    mBadge='📚 Glossary Term'; mStyle='background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.35);color:#c084fc';
+    mTitle=key; mSub='Definition';
+    html=`<div class="modal-section"><p class="modal-desc" style="font-size:16px; color:#e2e8f0;">${def ? autoLink(def) : 'Definition not found for this specific term yet.'}</p></div>`;
+  }
+  else if(type==='vendor') {
+    data = VENDOR_DB[key];
+    mBadge='🏢 Vendor / Product'; mStyle='background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.35);color:#93c5fd';
+    mTitle=key;
+    if(!data) {
+       mSub='Technology Provider';
+       html=`<div class="modal-section"><p class="modal-desc"><strong style="color:#93c5fd">${key}</strong> is a technology vendor or product used in network infrastructure and security.</p></div>`;
+    } else {
+       mSub=data.category;
+       html=`<div class="modal-section"><p class="modal-desc">${autoLink(data.desc)}</p></div>
+             <div class="modal-section"><div class="modal-section-title">📦 Key Products</div>
+             <div class="chip-list">${data.products.map(p=>`<span class="chip" style="border-color:var(--border)">${p}</span>`).join('')}</div></div>`;
+    }
+  }
+  else if(type==='security') {
+    data=SECURITY_DB[key];
+    mBadge='🔒 Security Mechanism'; mStyle='background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.35);color:#86efac';
+    if(!data){
+      mTitle=key; mSub='Security Control / Defense Mechanism';
+      html=`<div class="modal-section"><p class="modal-desc"><strong style="color:#86efac">${key}</strong> is a security mechanism. Detailed breakdown is pending in the database.</p></div>`;
+    } else {
+      mTitle=`${data.icon} ${key}`; mSub=`${data.full} · ${data.tags.join(' · ')}`;
+      html=`
+        <div class="modal-section">
+          <div class="modal-section-title">📖 What It Is</div>
+          <p class="modal-desc">${autoLink(data.description)}</p>
+          <div class="chip-list" style="margin-top:8px">${data.tags.map(t=>`<span class="chip security" onclick="openModal('glossary', '${t.replace(/'/g,"\\'")}')">${t}</span>`).join('')}</div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">⚙️ How It Works</div>
+          <ul class="modal-list">
+            ${data.howItWorks.map((s,i)=>`<li><span class="modal-list-icon" style="color:#86efac;font-weight:700;font-size:12px">${i+1}.</span>${autoLink(s)}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="tip-box">
+          <div class="tip-box-title">🛡️ Protects Against</div>
+          <div class="chip-list">${data.protects.map(p=>`<span class="chip attack" onclick="openModal('attack','${p.replace(/'/g,"\\'")}')">${p}</span>`).join('')}</div>
+        </div>
+        <div class="modal-section" style="margin-top:16px">
+          <div class="modal-section-title">🏭 Products / Vendors</div>
+          <div class="chip-list">${data.vendors.map(v=>`<span class="chip vendor" onclick="openModal('vendor','${v.replace(/'/g,"\\'")}')">${v}</span>`).join('')}</div>
+        </div>
+        <div class="warning-box">
+          <div class="warning-box-title">⚠️ Limitations</div>
+          <p>${autoLink(data.limitations)}</p>
+        </div>`;
+    }
+  }
+  else if(type==='protocol') {
+    data=PROTOCOL_DB[key];
+    mBadge='Protocol'; mStyle='background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#818cf8';
+    mTitle=key; 
+    if(!data){
+      mSub='Network Protocol';
+      html=`<div class="modal-section"><p class="modal-desc"><strong style="color:#818cf8">${key}</strong> is a network protocol. Details are pending.</p></div>`;
+    } else {
+      mSub=`${data.full} · Layer ${data.layer} · ${data.category} · Port: ${data.port}`;
+      html=`<div class="modal-section"><div class="modal-section-title">📖 What Is It?</div><p class="modal-desc">${autoLink(data.description)}</p></div>
+        <div class="modal-section"><div class="modal-section-title">⚙️ How It Works</div><ul class="modal-list">${data.howItWorks.map((s,i)=>`<li><span class="modal-list-icon" style="color:#818cf8;font-weight:700;font-size:12px">${i+1}.</span>${autoLink(s)}</li>`).join('')}</ul></div>
+        <div class="modal-section"><div class="modal-section-title">🔧 Used By</div><div class="chip-list">${data.usedBy.map(u=>`<span class="chip protocol">${u}</span>`).join('')}</div></div>
+        <div class="warning-box"><div class="warning-box-title">⚠️ Security Threats</div><div class="chip-list" style="margin-bottom:8px">${data.attacks.map(a=>`<span class="chip attack" onclick="openModal('attack','${a.replace(/'/g,"\\'")}' )">${a}</span>`).join('')}</div><p style="font-size:12px">Targeted by: <span class="chip-list" style="display:inline-flex">${data.hackers.map(h=>`<span class="chip hacker" onclick="openModal('hacker','${h.replace(/'/g,"\\'")}')">${h}</span>`).join('')}</span></p></div>`;
+    }
+  }
+  else if(type==='device') {
+    data=DEVICE_DB[key];
+    mBadge='Network Device'; mStyle='background:rgba(6,182,212,0.15);border:1px solid rgba(6,182,212,0.35);color:#22d3ee';
+    if(!data){
+      mTitle=key; mSub='Network Infrastructure Device';
+      html=`<div class="modal-section"><p class="modal-desc"><strong style="color:#22d3ee">${key}</strong> is a network device. Details pending.</p></div>`;
+    } else {
+      mTitle=`${data.icon} ${key}`; mSub=`Operates at OSI Layer ${data.layer}`;
+      html=`<div class="modal-section"><div class="modal-section-title">📖 What Is It?</div><p class="modal-desc">${autoLink(data.description)}</p></div>
+        <div class="modal-section"><div class="modal-section-title">⚙️ How It Works at This Layer</div><ul class="modal-list">${data.howItWorks.map((s,i)=>`<li><span class="modal-list-icon" style="color:#22d3ee;font-weight:700;font-size:12px">${i+1}.</span>${autoLink(s)}</li>`).join('')}</ul></div>
+        <div class="modal-section"><div class="modal-section-title">✨ Key Features</div><div class="chip-list">${data.keyFeatures.map(f=>`<span class="chip device">${f}</span>`).join('')}</div></div>
+        <div class="modal-section"><div class="modal-section-title">🏭 Common Vendors</div><div class="chip-list">${data.vendors.map(v=>`<span class="chip vendor" onclick="openModal('vendor','${v.replace(/'/g,"\\'")}')">${v}</span>`).join('')}</div></div>
+        <div class="warning-box"><div class="warning-box-title">⚠️ Attack Vectors Against This Device</div><div class="chip-list">${data.attacks.map(a=>`<span class="chip attack" onclick="openModal('attack','${a.replace(/'/g,"\\'")}')">${a}</span>`).join('')}</div></div>`;
+    }
+  }
+  else if(type==='attack') {
+    data=ATTACK_DB[key];
+    mBadge='⚠️ Attack Method'; mStyle='background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.35);color:#f87171';
+    mTitle=key; 
+    if(!data){
+      mSub='Cyber Attack Technique';
+      html=`<div class="modal-section"><p class="modal-desc"><strong style="color:#fca5a5">${key}</strong> is an attack vector or threat. Detailed execution steps are pending in the database.</p></div>`;
+    } else {
+      const sc={critical:'cvss-critical',high:'cvss-high',medium:'cvss-medium',low:'cvss-low'}[data.severity] || 'cvss-medium';
+      mSub=`${data.category} · OSI Layer ${data.layer}`;
+      html=`<div class="modal-section">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span class="cvss-badge ${sc}">🔴 ${data.severity.toUpperCase()} SEVERITY</span><span style="font-size:13px;color:var(--text-muted)">${data.category}</span></div>
+          <p class="modal-desc">${autoLink(data.description)}</p>
+        </div>
+        <div class="modal-section"><div class="modal-section-title">💀 Attack Chain — Step by Step</div>
+          <div class="timeline">${data.howAttackWorks.map((s,i)=>`<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-step">Step ${i+1}</div><div class="timeline-desc">${autoLink(s)}</div></div></div>`).join('')}</div>
+        </div>
+        <div class="modal-section"><div class="modal-section-title">🛠️ Tools Used by Attackers</div>
+          <div class="chip-list">${data.tools.map(t=>`<span class="chip tool" onclick="openModal('tool','${t.replace(/'/g,"\\'")}')">${t}</span>`).join('')}</div>
+        </div>
+        <div class="modal-section"><div class="modal-section-title">👤 Who Uses This Attack</div>
+          <div class="chip-list">${data.hackerTypes.map(h=>`<span class="chip hacker" onclick="openModal('hacker','${h.replace(/'/g,"\\'")}')">${h}</span>`).join('')}</div>
+        </div>
+        <div class="tip-box"><div class="tip-box-title">🛡️ Defense Measures</div>
+          <div class="chip-list" style="margin-top:6px">${data.defense.map(d=>`<span class="chip security" onclick="openModal('security','${d.replace(/'/g,"\\'")}')">${d}</span>`).join('')}</div>
+        </div>
+        <div class="warning-box" style="margin-top:12px"><div class="warning-box-title">🌍 Real-World Examples</div><p>${autoLink(data.realWorld)}</p></div>`;
+    }
+  }
+  else if(type==='hacker') {
+    data=HACKER_DB[key];
+    if(!data)return;
+    const hc=data.hat.includes('White')?'#86efac':data.hat.includes('Black')?'#fca5a5':'#fde68a';
+    mBadge=`${data.icon} Threat Actor`; mStyle='background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.35);color:#c084fc';
+    mTitle=key; mSub=`${data.hat} Hat · ${data.skillLevel.split('—')[0].trim()}`;
+    html=`<div class="modal-section">
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">
+          <span style="font-size:36px">${data.icon}</span>
+          <div><span style="padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);color:${hc}">${data.hat} Hat</span><div style="font-size:12px;color:var(--text-muted);margin-top:4px">OSI Focus: ${data.osi_focus}</div></div>
+        </div>
+        <p class="modal-desc">${autoLink(data.description)}</p>
+      </div>
+      <div class="modal-section"><div class="modal-section-title">🎯 Threat Profile</div>
+        <div class="info-row"><span class="info-key">Motivation</span><span class="info-val">${data.motivation}</span></div>
+        <div class="info-row"><span class="info-key">Skill Level</span><span class="info-val">${data.skillLevel}</span></div>
+      </div>
+      <div class="modal-section"><div class="modal-section-title">🛠️ Preferred Tools</div>
+        <div class="chip-list">${data.tools.map(t=>`<span class="chip tool" onclick="openModal('tool','${t.replace(/'/g,"\\'")}')">${t}</span>`).join('')}</div>
+      </div>
+      <div class="modal-section"><div class="modal-section-title">⚔️ Typical Attacks</div>
+        <div class="chip-list">${data.typicalAttacks.map(a=>`<span class="chip attack" onclick="openModal('attack','${a.replace(/'/g,"\\'")}')">${a}</span>`).join('')}</div>
+      </div>
+      <div class="info-box"><div class="info-box-title">🌍 Real-World Examples</div><p>${autoLink(data.realWorldExamples)}</p></div>`;
+  }
+  else if(type==='tool') {
+    data=TOOL_DB[key];
+    mBadge='🛠️ Hacking Tool'; mStyle='background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.35);color:#fbbf24';
+    mTitle=key;
+    if(!data){
+      mSub='Security / Attack Tool';
+      html=`<div class="modal-section"><p class="modal-desc"><strong style="color:#fbbf24">${key}</strong> is a tool used in offensive security and penetration testing.</p></div>`;
+    } else {
+      mSub=`${data.category} · ${data.layer} · ${data.type}`;
+      html=`<div class="modal-section">
+          <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+            <span class="cvss-badge" style="background:rgba(234,179,8,0.15);border:1px solid rgba(234,179,8,0.3);color:#fbbf24">${data.type}</span>
+            <span class="cvss-badge" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#818cf8">${data.layer}</span>
+          </div>
+          <p class="modal-desc">${autoLink(data.description)}</p>
+        </div>
+        <div class="modal-section"><div class="modal-section-title">🚀 Capabilities</div>
+          <ul class="modal-list">${data.capabilities.map(c=>`<li><span class="modal-list-icon" style="color:#fbbf24">▶</span>${autoLink(c)}</li>`).join('')}</ul>
+        </div>
+        <div class="modal-section"><div class="modal-section-title">💻 Installation</div>
+          <div style="background:#0a0e1a;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;font-size:12px;color:#86efac">${data.installation}</div>
+        </div>
+        <div class="tip-box"><div class="tip-box-title">🛡️ Countermeasures</div>
+          <div class="chip-list" style="margin-top:6px">${data.countermeasures.map(c=>`<span class="chip security" onclick="openModal('security','${c.replace(/'/g,"\\'")}')">${c}</span>`).join('')}</div>
+        </div>
+        <div class="warning-box"><div class="warning-box-title">⚠️ Legal & Ethical</div><p>${data.legalNote}</p></div>`;
+    }
+  }
+
+  headerContent.innerHTML = `
+    ${backBtnHtml}
+    <div>
+      <div class="modal-type-badge" id="modalBadge" style="${mStyle}">${mBadge}</div>
+      <div class="modal-title" id="modalTitle">${mTitle}</div>
+      <div class="modal-subtitle" id="modalSubtitle">${mSub}</div>
+    </div>
+  `;
+  body.innerHTML=html;
+  overlay.classList.add('show');
+  document.body.style.overflow='hidden';
+}
+
+function goBackModal() {
+  const prev = modalHistory.pop();
+  if(prev) {
+      openModal(prev.type, prev.key, true);
+  }
+}
+
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); document.body.style.overflow=''; modalHistory = [];}
+function handleOverlayClick(e){ if(e.target===document.getElementById('modalOverlay')) closeModal(); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+// ─── STACK VIEW ───
+function renderStack(){
+  const stack=document.getElementById('layerStack');
+  stack.innerHTML='';
+  LAYERS.forEach((layer,i)=>{
+    const item=document.createElement('div');
+    item.className=`layer-item ${i===activeLayer?'active':''}`;
+    item.style.setProperty('--layer-color',layer.color);
+    item.onclick=()=>selectLayer(i);
+    item.innerHTML=`<div class="layer-num" style="background:${layer.color}">${layer.num}</div><div class="layer-info"><h3>${layer.name}</h3><p>${layer.subtitle}</p></div><span class="pdu-badge">${layer.pdu}</span>`;
+    stack.appendChild(item);
+  });
+  renderDetail(activeLayer);
+}
+
+function selectLayer(i){
+  activeLayer=i; activeInnerTab='overview';
+  document.querySelectorAll('.layer-item').forEach((el,idx)=>el.classList.toggle('active',idx===i));
+  renderDetail(i);
+}
+
+function renderDetail(i){
+  const layer=LAYERS[i], panel=document.getElementById('detailPanel');
+  panel.style.setProperty('--layer-color',layer.color);
+  panel.innerHTML=`
+    <div class="detail-header">
+      <div class="detail-header-top">
+        <div class="detail-num" style="background:${layer.color}">${layer.num}</div>
+        <div class="detail-title"><h2>Layer ${layer.num}: ${layer.name}</h2><div class="layer-subtitle">${layer.subtitle} · PDU: <strong style="color:${layer.color}">${layer.pdu}</strong></div></div>
+      </div>
+      <p class="detail-desc">${autoLink(layer.desc)}</p>
+    </div>
+    <div class="detail-body">
+      <div class="inner-tabs">
+        <button class="inner-tab ${activeInnerTab==='overview'?'active':''}" onclick="switchInnerTab('overview',${i},this)">📋 Overview</button>
+        <button class="inner-tab ${activeInnerTab==='protocols'?'active':''}" onclick="switchInnerTab('protocols',${i},this)">📡 Protocols</button>
+        <button class="inner-tab ${activeInnerTab==='devices'?'active':''}" onclick="switchInnerTab('devices',${i},this)">🖥️ Devices</button>
+        <button class="inner-tab hacker-tab ${activeInnerTab==='threats'?'active':''}" onclick="switchInnerTab('threats',${i},this)">💀 Threats</button>
+      </div>
+      <div id="innerContent" class="fade-in"></div>
+    </div>`;
+  renderInnerContent(activeInnerTab, i);
+}
+
+function switchInnerTab(tab, layerIdx, el){
+  activeInnerTab=tab;
+  document.querySelectorAll('.inner-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const content=document.getElementById('innerContent');
+  content.classList.remove('fade-in'); void content.offsetWidth; content.classList.add('fade-in');
+  renderInnerContent(tab,layerIdx);
+}
+
+function makeSecurityChip(s, layerColor) {
+  const hasDef = !!SECURITY_DB[s];
+  return `<div class="tooltip-container">
+    <span class="chip security" onclick="openModal('security','${s.replace(/'/g,"\\'")}' )">${s}</span>
+    ${hasDef ? `<div class="tooltip-popup">
+      <div class="tooltip-title">${SECURITY_DB[s].icon} ${s}</div>
+      <div class="tooltip-desc">${SECURITY_DB[s].description.substring(0,120)}...</div>
+      <div class="tooltip-meta">${SECURITY_DB[s].tags.map(t=>`<span class="tooltip-tag">${t}</span>`).join('')}</div>
+    </div>` : ''}
+  </div>`;
+}
+
+function renderInnerContent(tab, i){
+  const layer=LAYERS[i], el=document.getElementById('innerContent');
+  if(tab==='overview'){
+    el.innerHTML=`
+      <div class="info-card" style="margin-bottom:14px">
+        <div class="info-card-title">⚙️ Key Functions</div>
+        <ul class="functions-list">${layer.functions.map(fn=>`<li><span class="fn-icon" style="background:${layer.color}30;color:${layer.color}">✓</span>${autoLink(fn)}</li>`).join('')}</ul>
+      </div>
+      <div class="detail-grid">
+        <div class="info-card">
+          <div class="info-card-title">🔒 Security Mechanisms</div>
+          <div class="chip-list">${layer.security.map(s=>makeSecurityChip(s, layer.color)).join('')}</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-title">📦 PDU Info</div>
+          <div class="info-row"><span class="info-key">PDU Name</span><span class="info-val" style="color:${layer.color}">${layer.pdu}</span></div>
+          <div class="info-row"><span class="info-key">Layer #</span><span class="info-val">${layer.num}</span></div>
+          <div class="info-row"><span class="info-key">Type</span><span class="info-val">${layer.num>=5?'Upper Layer':layer.num>=3?'Middle Layer':'Lower Layer'}</span></div>
+        </div>
+      </div>`;
+  }
+  else if(tab==='protocols'){
+    el.innerHTML=`
+      <div class="info-card" style="margin-bottom:14px">
+        <div class="info-card-title">📡 Protocols — Click to Learn</div>
+        <div class="chip-list">${layer.protocols.map(p=>`<span class="chip protocol" onclick="openModal('protocol','${p.replace(/'/g,"\\'")}')">${p}</span>`).join('')}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">💡 How Protocols Work at This Layer</div>
+        <ul class="functions-list">
+          <li><span class="fn-icon" style="background:${layer.color}30;color:${layer.color}">📡</span>Protocols define message formats, sequencing, and error handling rules</li>
+          <li><span class="fn-icon" style="background:${layer.color}30;color:${layer.color}">🔄</span>Each protocol adds specific headers/trailers to the <span class="glossary-link" onclick="openModal('glossary', '${layer.pdu}')">${layer.pdu}</span></li>
+        </ul>
+      </div>`;
+  }
+  else if(tab==='devices'){
+    el.innerHTML=`
+      <div class="info-card" style="margin-bottom:14px">
+        <div class="info-card-title">🖥️ Devices — Click to Learn</div>
+        <div class="chip-list">${layer.devices.map(d=>`<span class="chip device" onclick="openModal('device','${d.replace(/'/g,"\\'")}')">${d}</span>`).join('')}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">⚙️ Device Role at Layer ${layer.num}</div>
+        <ul class="functions-list">
+          <li><span class="fn-icon" style="background:${layer.color}30;color:${layer.color}">🖥️</span>These devices primarily operate by processing <span class="glossary-link" onclick="openModal('glossary', '${layer.pdu}')">${layer.pdu}s</span></li>
+          <li><span class="fn-icon" style="background:${layer.color}30;color:${layer.color}">🛡️</span>Each device implements security controls specific to Layer ${layer.num}</li>
+        </ul>
+      </div>`;
+  }
+  else if(tab==='threats'){
+    el.innerHTML=`
+      <div class="threat-overview"><p><strong>Layer ${layer.num} Threat Landscape:</strong> ${autoLink(layer.threatSummary)}</p></div>
+      <div class="info-card" style="margin-bottom:14px">
+        <div class="info-card-title">⚔️ Attacks — Click for Full Attack Chain</div>
+        <div class="chip-list">${layer.attacks.map(a=>`<span class="chip attack" onclick="openModal('attack','${a.replace(/'/g,"\\'")}')">${a}</span>`).join('')}</div>
+      </div>
+      <div class="info-card" style="margin-bottom:14px">
+        <div class="info-card-title">🛠️ Tools Used — Click for Tool Details</div>
+        <div class="chip-list">${layer.tools.map(t=>`<span class="chip tool" onclick="openModal('tool','${t.replace(/'/g,"\\'")}')">${t}</span>`).join('')}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">👤 Threat Actors</div>
+        <div class="chip-list">${layer.hackerTypes.map(h=>`<span class="chip hacker" onclick="openModal('hacker','${h.replace(/'/g,"\\'")}')">${h}</span>`).join('')}</div>
+      </div>`;
+  }
+}
+
+// ─── HACKER HUB ───
+function renderHackerHub(){
+  const el=document.getElementById('hackerHubContent');
+  el.innerHTML=`
+    <div class="hacker-hero">
+      <div style="font-size:48px">💀</div>
+      <h2>Hacker Hub — Offensive Security</h2>
+      <p>Understand how attackers think, what tools they use, and how they exploit each OSI layer.</p>
+    </div>
+    <h3 style="font-size:18px;font-weight:800;margin-bottom:16px">👤 Threat Actor Profiles</h3>
+    <div class="hacker-who-grid" style="margin-bottom:32px">
+      ${Object.entries(HACKER_DB).map(([name,data])=>`
+        <div class="who-card" onclick="openModal('hacker','${name}')" style="border-color:${data.hat.includes('White')?'rgba(34,197,94,0.3)':data.hat.includes('Black')?'rgba(239,68,68,0.3)':'rgba(234,179,8,0.3)'}">
+          <div class="who-icon">${data.icon}</div>
+          <div class="who-name">${name}</div>
+          <div class="who-desc">${data.hat} Hat</div>
+          <div style="margin-top:8px"><span style="font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(168,85,247,0.15);color:#c084fc;font-weight:600">${data.osi_focus}</span></div>
+        </div>`).join('')}
+    </div>
+    <h3 style="font-size:18px;font-weight:800;margin-bottom:16px">⚔️ Attacks by OSI Layer</h3>
+    <div class="hacker-section-grid" style="margin-bottom:32px">
+      ${LAYERS.map(layer=>`
+        <div class="hacker-card">
+          <div class="hacker-card-header">
+            <div style="width:36px;height:36px;border-radius:9px;background:${layer.color};display:flex;align-items:center;justify-content:center;font-weight:800;color:white;font-size:14px">${layer.num}</div>
+            <div><div class="hacker-card-title" style="color:${layer.color}">${layer.name} Layer</div><div class="hacker-card-sub">${layer.attacks.length} attacks</div></div>
+          </div>
+          <div class="hacker-card-body">
+            <div class="chip-list" style="margin-bottom:10px">${layer.attacks.map(a=>`<span class="chip attack" onclick="openModal('attack','${a.replace(/'/g,"\\'")}')">${a}</span>`).join('')}</div>
+            <div class="chip-list">${layer.tools.map(t=>`<span class="chip tool" onclick="openModal('tool','${t.replace(/'/g,"\\'")}')">${t}</span>`).join('')}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ─── MIND MAP, COMPARISON, ENCAPSULATION, QUIZ ───
+function initMindMap(){
+  mmCanvas=document.getElementById('mindmapCanvas'); mmCtx=mmCanvas.getContext('2d');
+  const wrapper=mmCanvas.parentElement; mmCanvas.width=wrapper.clientWidth||1000; mmCanvas.height=620;
+  mmTransform={x:mmCanvas.width/2,y:mmCanvas.height/2,scale:1};
+  mmCanvas.onmousedown=e=>{mmDrag.active=true;mmDrag.startX=e.clientX;mmDrag.startY=e.clientY;mmDrag.originX=mmTransform.x;mmDrag.originY=mmTransform.y;};
+  mmCanvas.onmousemove=e=>{if(!mmDrag.active)return;mmTransform.x=mmDrag.originX+(e.clientX-mmDrag.startX);mmTransform.y=mmDrag.originY+(e.clientY-mmDrag.startY);drawMindMap();};
+  mmCanvas.onmouseup=mmCanvas.onmouseleave=()=>mmDrag.active=false;
+  mmCanvas.onwheel=e=>{e.preventDefault();mmZoom(e.deltaY>0?0.9:1.1);};
+  mmCanvas.onclick=mmClick; drawMindMap();
+}
+function getNodePositions(){
+  const nodes=[{type:'center',x:0,y:0,r:58,label:'OSI\nModel',color:'#6366f1'}];
+  const radius=210;
+  LAYERS.forEach((layer,i)=>{
+    const angle=(i/LAYERS.length)*Math.PI*2-Math.PI/2;
+    const lx=Math.cos(angle)*radius,ly=Math.sin(angle)*radius;
+    nodes.push({type:'layer',x:lx,y:ly,r:42,label:`L${layer.num}\n${layer.name}`,color:layer.color,layerIdx:i,angle});
+    let children = [];
+    if(layer.protocols.length) children.push({label:layer.protocols[0],icon:'📡'});
+    children.push({label:layer.pdu,icon:'📦'});
+    if(layer.devices.length) children.push({label:layer.devices[0],icon:'🖥️'});
+    children.forEach((child,ci)=>{
+      const ca=angle+(ci-1)*0.45;
+      nodes.push({type:'child',x:lx+Math.cos(ca)*105,y:ly+Math.sin(ca)*105,r:28,label:`${child.icon} ${child.label}`,color:layer.color,parentX:lx,parentY:ly,layerIdx:i});
+    });
+  }); return nodes;
+}
+function drawMindMap(){
+  if(!mmCanvas||!mmCtx)return; const ctx=mmCtx,W=mmCanvas.width,H=mmCanvas.height;
+  ctx.clearRect(0,0,W,H); ctx.fillStyle='#111827'; ctx.fillRect(0,0,W,H);
+  ctx.save(); ctx.translate(mmTransform.x,mmTransform.y); ctx.scale(mmTransform.scale,mmTransform.scale);
+  mmNodes=getNodePositions();
+  mmNodes.forEach(node=>{
+    if(node.type==='layer'){ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(node.x,node.y);ctx.strokeStyle='#ffffff0a';ctx.lineWidth=2;ctx.stroke();}
+    if(node.type==='child'){ctx.beginPath();ctx.moveTo(node.parentX,node.parentY);ctx.lineTo(node.x,node.y);ctx.strokeStyle=(highlightedNode===node.layerIdx?node.color+'50':'#ffffff06');ctx.lineWidth=1.5;ctx.stroke();}
+  });
+  mmNodes.forEach(node=>{
+    const hl=highlightedNode!==null&&node.layerIdx===highlightedNode,isCenter=node.type==='center';
+    ctx.globalAlpha=highlightedNode===null||hl||isCenter?1:0.3;
+    if(hl||isCenter){ctx.save();ctx.shadowColor=node.color;ctx.shadowBlur=18;ctx.beginPath();ctx.arc(node.x,node.y,node.r,0,Math.PI*2);ctx.fillStyle=node.color+'25';ctx.fill();ctx.restore();}
+    ctx.beginPath();ctx.arc(node.x,node.y,node.r,0,Math.PI*2);
+    if(isCenter){const g=ctx.createRadialGradient(node.x,node.y,0,node.x,node.y,node.r);g.addColorStop(0,'#818cf8');g.addColorStop(1,'#4f46e5');ctx.fillStyle=g;}
+    else ctx.fillStyle=node.color+(hl?'cc':'88');
+    ctx.fill(); ctx.strokeStyle=node.color+(hl?'ff':'55');ctx.lineWidth=hl?2.5:1.5;ctx.stroke();
+    ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+    const fs=node.type==='child'?9:node.type==='layer'?11:13; ctx.font=`bold ${fs}px sans-serif`;
+    const lines=node.label.split('\n');
+    if(lines.length===2){ctx.fillText(lines[0],node.x,node.y-fs*0.65);ctx.font=`${fs-1}px sans-serif`;ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fillText(lines[1],node.x,node.y+fs*0.75);}
+    else{ const words=node.label.split(' '); ctx.fillText(node.label, node.x, node.y); }
+    ctx.globalAlpha=1;
+  }); ctx.restore();
+}
+function mmZoom(f){mmTransform.scale=Math.max(0.3,Math.min(3,mmTransform.scale*f));drawMindMap();}
+function mmReset(){if(!mmCanvas)return;mmTransform={x:mmCanvas.width/2,y:mmCanvas.height/2,scale:1};highlightedNode=null;drawMindMap();}
+function mmClick(e){
+  if(!mmCanvas)return; const rect=mmCanvas.getBoundingClientRect();
+  const mx=(e.clientX-rect.left-mmTransform.x)/mmTransform.scale, my=(e.clientY-rect.top-mmTransform.y)/mmTransform.scale;
+  let hit=null; mmNodes.forEach(n=>{if(Math.sqrt((mx-n.x)**2+(my-n.y)**2)<n.r&&n.layerIdx!==undefined)hit=n.layerIdx;});
+  highlightedNode=hit===highlightedNode?null:hit; drawMindMap();
+}
+
+function renderComparison(filter=''){
+  const grid=document.getElementById('comparisonGrid'); grid.innerHTML=''; const fl=filter.toLowerCase();
+  LAYERS.forEach(layer=>{
+    if(!(!fl||layer.name.toLowerCase().includes(fl)||layer.protocols.some(p=>p.toLowerCase().includes(fl))))return;
+    const card=document.createElement('div'); card.className='compare-card'; card.style.setProperty('--layer-color',layer.color);
+    card.innerHTML=`<div class="compare-card-header" style="--layer-color:${layer.color}"><div style="width:34px;height:34px;border-radius:9px;background:${layer.color};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:white">${layer.num}</div><div><div style="font-weight:700;font-size:15px">${layer.name}</div><div style="font-size:11px;color:var(--text-muted)">${layer.subtitle}</div></div></div>
+      <div class="compare-card-body">
+        <div class="compare-row"><span class="compare-key">PDU</span><span class="compare-val" style="color:${layer.color}">${layer.pdu}</span></div>
+        <div class="compare-row"><span class="compare-key">Protocols</span><span class="compare-val">${layer.protocols.slice(0,3).join(', ')}</span></div>
+        <div class="compare-row"><span class="compare-key">Top Attack</span><span class="compare-val" style="color:#f87171;cursor:pointer" onclick="openModal('attack','${(layer.attacks[0]||'').replace(/'/g,"\\'")}' )">${layer.attacks[0]||'N/A'}</span></div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+function filterComparison(){ renderComparison(document.getElementById('searchInput').value); }
+
+const ENCAP_DATA=[
+  {action:'Original data',added:'App headers'},{action:'Encrypt/Compress',added:'Format headers'},
+  {action:'Session sync',added:'Session ID'},{action:'Port addressing',added:'TCP/UDP headers'},
+  {action:'Logical routing',added:'IP Header'},{action:'Physical addressing',added:'MAC Header + FCS'},
+  {action:'Signal encoding',added:'Bits/Signals'}
+];
+function renderEncapsulation(){
+  const container=document.getElementById('encapSteps'); container.innerHTML='';
+  LAYERS.forEach((layer,i)=>{
+    const nextLayer=LAYERS[i+1], step=document.createElement('div'); step.className='encap-step';
+    step.innerHTML=`<div class="encap-step-line"><div class="encap-dot" style="background:${layer.color}">${layer.num}</div>${nextLayer?`<div class="encap-connector" style="background:linear-gradient(${layer.color},${nextLayer.color})"></div>`:''}</div>
+      <div class="encap-content"><div class="encap-header"><h3 style="color:${layer.color}">Layer ${layer.num}: ${layer.name}</h3></div>
+      <div class="encap-packet">${buildPacketView(i)}</div><p style="font-size:11px;color:var(--text-muted);margin-top:6px">+ Added: ${ENCAP_DATA[i].added}</p></div>`;
+    container.appendChild(step);
+  });
+}
+function buildPacketView(idx){
+  if(idx===6)return`<div class="encap-segment seg-l1" style="flex:1">01010010 11010111 00101001 10100101</div>`;
+  const s=[`<div class="encap-segment seg-data">Data</div>`];
+  if(idx<=0)s.push(`<div class="encap-segment seg-l7">L7</div>`);
+  if(idx<=3)s.push(`<div class="encap-segment seg-l4">TCP</div>`);
+  if(idx<=4)s.push(`<div class="encap-segment seg-l3">IP</div>`);
+  if(idx<=5){s.unshift(`<div class="encap-segment seg-l2h">MAC</div>`);s.push(`<div class="encap-segment seg-l2t">FCS</div>`);}
+  return s.join('');
+}
+
+const QUESTIONS=[
+  {q:'Which OSI layer handles end-to-end communication using TCP and UDP?',options:['Network (L3)','Transport (L4)','Session (L5)','Data Link (L2)'],answer:1,explanation:'<strong>Layer 4 (Transport)</strong> handles end-to-end communication. TCP provides reliable ordered delivery; UDP is fast but connectionless.'},
+  {q:'What PDU does the Data Link layer use?',options:['Packet','Segment','Frame','Bit'],answer:2,explanation:'<strong>Data Link (Layer 2)</strong> uses <strong>Frames</strong>. Layer 3=Packets, Layer 4=Segments, Layer 1=Bits.'},
+  {q:'DNS operates at which OSI layer?',options:['Transport','Network','Application','Session'],answer:2,explanation:'<strong>DNS</strong> is an <strong>Application Layer (7)</strong> protocol using UDP port 53 for name resolution.'},
+  {q:'A switch primarily operates at which layer?',options:['Layer 1','Layer 2','Layer 3','Layer 4'],answer:1,explanation:'<strong>Switches</strong> operate at <strong>Layer 2 (Data Link)</strong> using MAC addresses to forward frames within a LAN.'},
+  {q:'Which layer is responsible for data encryption and compression?',options:['Session','Presentation','Application','Transport'],answer:1,explanation:'<strong>Layer 6 (Presentation)</strong> handles encryption (TLS), compression (gzip), and format conversion.'},
+  {q:'What attack exploits the TCP 3-way handshake with spoofed IPs?',options:['DNS Spoofing','ARP Poisoning','SYN Flood','BGP Hijacking'],answer:2,explanation:'<strong>SYN Flood</strong> sends SYN packets with spoofed IPs, filling the server\'s connection table with half-open connections.'},
+  {q:'ARP Spoofing is an attack at which OSI layer?',options:['Layer 1','Layer 2','Layer 3','Layer 4'],answer:1,explanation:'<strong>ARP Spoofing</strong> operates at <strong>Layer 2 (Data Link)</strong> by poisoning ARP caches to redirect traffic.'},
+  {q:'Which tool is commonly used for ARP Spoofing attacks?',options:['SQLMap','Bettercap','hping3','ExaBGP'],answer:1,explanation:'<strong>Bettercap</strong> is a powerful framework for ARP spoofing and MITM attacks at Layer 2.'},
+  {q:'BGP Hijacking attacks which OSI layer?',options:['Layer 2','Layer 3','Layer 4','Layer 7'],answer:1,explanation:'<strong>BGP Hijacking</strong> is a <strong>Layer 3 (Network)</strong> attack that redirects internet traffic by advertising false IP prefixes.'},
+  {q:'Which hacker type is MOST likely to use zero-day exploits?',options:['Script Kiddie','Hacktivist','APT Group','Penetration Tester'],answer:2,explanation:'<strong>APT Groups</strong> use custom malware and zero-day exploits in sophisticated, long-duration campaigns.'},
+  {q:'What does MAC Flooding cause a switch to do?',options:['Shutdown all ports','Act like a hub (broadcast all)','Drop all frames','Start routing packets'],answer:1,explanation:'<strong>MAC Flooding</strong> fills the CAM table. The switch enters fail-open mode, broadcasting all traffic like a hub.'},
+  {q:'Which defense prevents SYN Flood attacks?',options:['DNSSEC','SYN Cookies','BPDU Guard','RPKI'],answer:1,explanation:'<strong>SYN Cookies</strong> eliminate the need for server-side half-open connection state, nullifying the SYN Flood attack.'}
+];
+
+function initQuiz(){
+  quizState={initialized:true,current:0,score:0,answered:false,shuffled:[...QUESTIONS].sort(()=>Math.random()-0.5)};
+  document.getElementById('qTotal').textContent=quizState.shuffled.length; renderQuestion();
+}
+function renderQuestion(){
+  const q=quizState.shuffled[quizState.current], card=document.getElementById('quizCard');
+  document.getElementById('quizResult').classList.remove('show'); card.style.display='';
+  document.getElementById('qNum').textContent=quizState.current+1; document.getElementById('qScore').textContent=quizState.score;
+  document.getElementById('quizProgressFill').style.width=`${(quizState.current/quizState.shuffled.length)*100}%`;
+  const letters=['A','B','C','D'];
+  card.innerHTML=`<div class="quiz-q-header"><div class="quiz-q-num">Question ${quizState.current+1}</div><div class="quiz-question">${q.q}</div></div>
+    <div class="quiz-options">${q.options.map((opt,i)=>`<div class="quiz-option" onclick="selectAnswer(${i})"><span class="option-letter">${letters[i]}</span>${opt}</div>`).join('')}</div>
+    <div class="quiz-footer"><div class="quiz-explanation" id="quizExp">${q.explanation}</div><button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Next →</button></div>`;
+  quizState.answered=false;
+}
+function selectAnswer(sel){
+  if(quizState.answered)return; quizState.answered=true; const correct=quizState.shuffled[quizState.current].answer;
+  document.querySelectorAll('.quiz-option').forEach((o,i)=>{if(i===correct)o.classList.add('correct');else if(i===sel)o.classList.add('wrong');o.style.pointerEvents='none';});
+  if(sel===correct){quizState.score++;document.getElementById('qScore').textContent=quizState.score;}
+  document.getElementById('quizExp').classList.add('show'); document.getElementById('nextBtn').disabled=false;
+}
+function nextQuestion(){
+  quizState.current++;
+  if(quizState.current>=quizState.shuffled.length){
+    document.getElementById('quizCard').style.display='none';
+    const pct=Math.round((quizState.score/quizState.shuffled.length)*100);
+    document.getElementById('resultScore').textContent=pct+'%';
+    const msg = pct===100?'Perfect Score! 🏆':pct>=80?'Great Work! 🎉':pct>=60?'Good Effort! 👍':'Keep Studying! 📚';
+    const sub = `You got ${quizState.score} out of ${quizState.shuffled.length} questions correct.`;
+    document.getElementById('resultMsg').textContent=msg;
+    document.getElementById('resultSub').textContent=sub;
+    document.getElementById('quizResult').classList.add('show'); quizState.initialized=false;
+  } else renderQuestion();
+}
+function restartQuiz(){ initQuiz(); }
+
+document.addEventListener('DOMContentLoaded', ()=>{ renderStack(); });
+window.addEventListener('resize', ()=>{ if(currentView==='mindmap'&&mmCanvas){mmCanvas.width=mmCanvas.parentElement.clientWidth;drawMindMap();} });
+</script>
+</body>
+</html>
